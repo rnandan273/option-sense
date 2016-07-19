@@ -255,11 +255,13 @@
           [buy-butterfly]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/icon-button {:tooltip "Execute " :tooltip-position "bottom-right"}
-                          (ic/content-send)]]
+                  [ui/raised-button {:label        "Execute"
+                        :icon         (ic/content-send)
+                        :on-touch-tap #()}]]
               [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/icon-button {:tooltip "Save " :tooltip-position "bottom-right"}
-                          (ic/content-save)]]
+                  [ui/raised-button {:label        "Save"
+                        :icon         (ic/content-save)
+                        :on-touch-tap #()}]]
                           ]])))
 
 (defn buy-call-ladder-card []
@@ -277,11 +279,13 @@
           [buy-call-ladder]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/icon-button {:tooltip "Execute " :tooltip-position "bottom-right"}
-                          (ic/content-send)]]
+                  [ui/raised-button {:label        "Execute"
+                        :icon         (ic/content-send)
+                        :on-touch-tap #()}]]
               [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/icon-button {:tooltip "Save " :tooltip-position "bottom-right"}
-                          (ic/content-save)]]
+                  [ui/raised-button {:label        "Save"
+                        :icon         (ic/content-save)
+                        :on-touch-tap #()}]]
                           ]])))
 
 
@@ -300,11 +304,13 @@
           [sell-butterfly]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/icon-button {:tooltip "Execute " :tooltip-position "bottom-right"}
-                          (ic/content-send)]]
+                  [ui/raised-button {:label        "Execute"
+                        :icon         (ic/content-send)
+                        :on-touch-tap #()}]]
               [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/icon-button {:tooltip "Save " :tooltip-position "bottom-right"}
-                          (ic/content-save)]]
+                  [ui/raised-button {:label        "Save"
+                        :icon         (ic/content-save)
+                        :on-touch-tap #()}]]
                           ]])))
 
 (defn sell-1-3-2-butterfly-card []
@@ -323,11 +329,13 @@
           [sell-1-3-2-butterfly]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/icon-button {:tooltip "Execute " :tooltip-position "bottom-right"}
-                          (ic/content-send)]]
+                  [ui/raised-button {:label        "Execute"
+                        :icon         (ic/content-send)
+                        :on-touch-tap #()}]]
               [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/icon-button {:tooltip "Save " :tooltip-position "bottom-right"}
-                          (ic/content-save)]]
+                  [ui/raised-button {:label        "Save"
+                        :icon         (ic/content-save)
+                        :on-touch-tap #()}]]
                           ]])))
 
 (defn buy-1-3-2-butterfly-card []
@@ -346,11 +354,13 @@
           [buy-1-3-2-butterfly]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/icon-button {:tooltip "Execute " :tooltip-position "bottom-right"}
-                          (ic/content-send)]]
+                  [ui/raised-button {:label        "Execute"
+                        :icon         (ic/content-send)
+                        :on-touch-tap #()}]]
               [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/icon-button {:tooltip "Save " :tooltip-position "bottom-right"}
-                          (ic/content-save)]]
+                  [ui/raised-button {:label        "Save"
+                        :icon         (ic/content-save)
+                        :on-touch-tap #()}]]
                           ]])))
 
 
