@@ -1,0 +1,7 @@
+[0mCompiling "target/cljsbuild/public/js/app.js" from ["src/cljs" "src/cljc" "env/dev/cljs"]...[0m
+[31mFailed to compile "target/cljsbuild/public/js/app.js" in 0.423 seconds.[0m
+[36m----  Could not Analyze  src/cljs/optiontrader/core.cljs  ----[0m
+
+  [1mNo such namespace: cljsjs.material-ui, could not locate cljsjs/material_ui.cljs, cljsjs/material_ui.cljc, or Closure namespace "cljsjs.material-ui" [0m
+
+[36m----  Analysis Error : Please see src/cljs/optiontrader/core.cljs  ----[0m
