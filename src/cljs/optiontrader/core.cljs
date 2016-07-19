@@ -44,9 +44,9 @@
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
                                         {:name "Sell Butterfly"
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
-                                        {:name "Buy 1-3-2 Butterfly"
+                                        {:name "Buy Broken wing Butterfly"
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
-                                        {:name "Sell 1-3-2 Butterfly"
+                                        {:name "Sell Broken wing Butterfly"
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
                                         ]}}))
 
@@ -251,7 +251,7 @@
         pr3 (get-premium sp3)]
   [rui/card 
           [rui/card-header "Buy Butterfly"]
-          [rui/card-text "Details for this strategy"]
+          [rui/card-text (str "The butterfly spread is a neutral strategy that is a combination of a bull spread and a bear spread. It is a limited profit, limited risk options strategy. There are 3 striking prices involved in a butterfly spread and it can be constructed using calls or puts.")]
           [buy-butterfly]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
@@ -273,7 +273,7 @@
         pr3 (get-premium sp3)]
   [rui/card 
           [rui/card-header "Buy Call ladder"]
-          [rui/card-text "Details for this strategy"]
+          [rui/card-text (str "The call backspread (reverse call ratio spread) is a bullish strategy in options trading that involves selling a number of call options and buying more call options of the same underlying stock and expiration date at a higher strike price. It is an unlimited profit, limited risk options trading strategy that is taken when the options trader thinks that the underlying stock will experience significant upside movement in the near term.")]
           [buy-call-ladder]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
@@ -296,7 +296,7 @@
         pr3 (get-premium sp3)]
   [rui/card 
           [rui/card-header "Sell Butterfly"]
-          [rui/card-text "Details for this strategy"]
+          [rui/card-text (str "This is the converse of buying a butterfly spread")]
           [sell-butterfly]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
@@ -318,8 +318,8 @@
         pr3 (get-premium sp3)]
 
   [rui/card 
-          [rui/card-header "Sell 1-3-2 Butterfly"]
-          [rui/card-text "Details for this strategy"]
+          [rui/card-header "Sell Broken Wing Butterfly"]
+          [rui/card-text (str "This is the converse of Buying a Broken wing butterfly")]
           [sell-1-3-2-butterfly]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
@@ -341,8 +341,8 @@
         pr3 (get-premium sp3)]
 
   [rui/card 
-          [rui/card-header "Buy 1-3-2 Butterfly"]
-          [rui/card-text "Details for this strategy"]
+          [rui/card-header "Buy Broken Wing Butterfly"]
+          [rui/card-text (str "In this strategy a short call spread is embedded inside a long call butterfly spread. A Broken Wing Butterfly is a long butterfly spread with long strikes that are not equidistant from the short strike. This leads to one side having greater risk than the other, which makes the trade slightly more directional than a standard long butterfly spread")]
           [buy-1-3-2-butterfly]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
@@ -399,9 +399,9 @@
      :data (mat/add (sell-call sp1 pr1) (mat/mul 2 (buy-call sp2 pr2)))}
     {:name "Sell Butterfly" 
      :data (mat/add (sell-call sp1 pr1) (mat/mul 2 (buy-call sp2 pr2)) (sell-call sp3 pr3))}
-    {:name "Buy 1-3-2 Butterfly" 
+    {:name "Buy Broken Wing Butterfly" 
      :data (mat/add (buy-call sp1 pr1) (mat/mul 3 (sell-call sp3 pr3)) (mat/mul 2 (buy-call sp4 pr4)))}
-    {:name "Sell 1-3-2 Butterfly"
+    {:name "Sell Broken Wing Butterfly"
      :data (mat/add (sell-call sp1 pr1) (mat/mul 3 (buy-call sp3 pr3)) (mat/mul 2 (sell-call sp4 pr4)))}
  
     ])
@@ -450,8 +450,8 @@
          [rui/menu-item {:value "buy-butterfly" :primary-text "Buy Butterfly"}]
          [rui/menu-item {:value "sell-butterfly"} "Sell butterfly"]
          [rui/menu-item {:value "buy-call-ladder"} "Buy Call ladder"]
-         [rui/menu-item {:value "buy-1-3-2-butterfly"} "Buy 1-3-2 butterfly"]
-         [rui/menu-item {:value "sell-1-3-2-butterfly"} "Sell 1-3-2 butterfly"]]]))
+         [rui/menu-item {:value "buy-1-3-2-butterfly"} "Buy Broken Wing butterfly"]
+         [rui/menu-item {:value "sell-1-3-2-butterfly"} "Sell Broken Wing butterfly"]]]))
 
 (defn strategies-comp []
   (fn []
