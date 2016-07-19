@@ -19,7 +19,8 @@
 (def app-state (reagent/atom {:strike-price 7700 
                         :span 100
                         :chart-config
-                              {:chart {:type "line" :events {:click (fn [event] (print event))}}
+                              {:chart {:type "line" :events {:click (fn [event] (print event)
+                                )}}
                                :title {:text "Strategies v/s strike prices"}
                                :subtitle {:text "Source: Xpertview analytics"}
                                :xAxis {:categories ["7500" "7600" "7700" "7800" "7900" "8000" "8100" "8200" "8300" "8400"]
@@ -110,14 +111,17 @@
           [:div {:style {:flex "1"}} "Premium "]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp1]
+            [:div {:style {:flex "1"}}  "Buy 1 lot"]
             [:div {:style {:flex "1"}}  pr1]
           ]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp3]
+            [:div {:style {:flex "1"}}  "Sell 3 lot"]
             [:div {:style {:flex "1"}}  pr3]
           ]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp4]
+            [:div {:style {:flex "1"}}  "Buy 2 lot"]
             [:div {:style {:flex "1"}}  pr4]
           ]]]])))
 
@@ -138,14 +142,17 @@
           [:div {:style {:flex "1"}} "Premium "]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp1]
+            [:div {:style {:flex "1"}}  "Buy 1 lot"]
             [:div {:style {:flex "1"}}  pr1]
           ]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp3]
+            [:div {:style {:flex "1"}}  "Buy 3 lot"]
             [:div {:style {:flex "1"}}  pr3]
           ]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp4]
+            [:div {:style {:flex "1"}}  "Sell 2 lot"]
             [:div {:style {:flex "1"}}  pr4]
           ]]]])))
 
@@ -165,14 +172,17 @@
           [:div {:style {:flex "1"}} "Premium "]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp1]
+            [:div {:style {:flex "1"}}  "Sell 1 lot"]
             [:div {:style {:flex "1"}}  pr1]
           ]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp2]
+            [:div {:style {:flex "1"}}  "Buy 2 lot"]
             [:div {:style {:flex "1"}}  pr2]
           ]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp3]
+            [:div {:style {:flex "1"}}  "Sell 1 lot"]
             [:div {:style {:flex "1"}}  pr3]
           ]]]])))
 
@@ -191,10 +201,12 @@
           [:div {:style {:flex "1"}} "Premium "]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp1]
+            [:div {:style {:flex "1"}}  "Sell 1 lot"]
             [:div {:style {:flex "1"}}  pr1]
           ]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp2]
+            [:div {:style {:flex "1"}}  "Buy 2 lot"]
             [:div {:style {:flex "1"}}  pr2]
           ]
         ]]])))
@@ -214,14 +226,17 @@
           [:div {:style {:flex "1"}} "Premium "]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp1]
+            [:div {:style {:flex "1"}}  "Buy 1 lot"]
             [:div {:style {:flex "1"}}  pr1]
           ]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp2]
+            [:div {:style {:flex "1"}}  "Sell 2 lot"]
             [:div {:style {:flex "1"}}  pr2]
           ]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp3]
+            [:div {:style {:flex "1"}}  "Buy 1 lot"]
             [:div {:style {:flex "1"}}  pr3]
           ]]]])))
 
@@ -472,7 +487,7 @@
                 [:h4 "Option Strategy screener for Nifty"]
                 [:h4 "please enter the strike price and the system will automatically pick"]
                 [:h4 "the latest price for the spread "]]]
-          [:div {:style {:flex "1"}} 
+          [:div {:style {:flex "1" :align-content "center"}} 
            [rui/paper  {:zDepth 4}
                   [rui/text-field
                           {
