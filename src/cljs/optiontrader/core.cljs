@@ -543,12 +543,11 @@
           [:div {:style {:flex "1"}} 
            [rui/paper  {:zDepth 4}
                   [rui/text-field
-                          {
-                          :floatingLabelText "Enter Nifty strike price eg: 7500"
-                          :full-width false
-                          :value (:strike-price @app-state)
-                          :on-change #(update-strike-price (.. % -target -value))
-                          }]]]
+                          {:floatingLabelText "Enter Nifty strike price eg: 7500"
+                            :full-width false
+                            :value (:strike-price @app-state)
+                            :on-change #(update-strike-price (.. % -target -value))
+                            }]]]
           [:div {:style {:flex "1"}} [highchart-component]]]]
       [:div {:style {:flex "1"}} 
         [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
@@ -600,8 +599,7 @@
   (fn []
     [rui/mui-theme-provider
       {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue500)}})}
-        [:div {:style {:display "flex" :background-color display-color :flex-direction "row" :flex-flow "row wrap"}}
-            [strategies-comp]]]))
+        [strategies-comp]]))
 
 (def pages
   {:home #'home-page
