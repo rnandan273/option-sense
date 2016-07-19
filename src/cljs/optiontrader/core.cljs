@@ -103,6 +103,7 @@
         pr2 (get-premium sp2)
         pr3 (get-premium sp3)
         pr4 (get-premium sp4)]
+
   [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
       [:div {:style {:flex "1"}}
         [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
@@ -119,38 +120,6 @@
             [:div {:style {:flex "1"}}  sp4]
             [:div {:style {:flex "1"}}  pr4]
           ]]]])))
-
-(defn buy-1-3-2-butterfly-old []
-  (fn []
-  (let [sp1 (:strike-price @app-state)
-        span (:span @app-state)
-        sp2 (+ sp1 span)
-        sp3 (+ sp1 (* 2 span))
-        sp4 (+ sp1 (* 3 span))
-        pr1 (get-premium sp1)
-        pr2 (get-premium sp2)
-        pr3 (get-premium sp3)
-        pr4 (get-premium sp4)]
-  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
-      [:div {:style {:flex "1"}}
-        [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-          [:div {:style {:flex "1"}} "Sell 1-3-2 Butterfly  "]
-          [:div {:style {:flex "1"}} "Premium "]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp1]
-            [:div {:style {:flex "1"}}  pr1]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp3]
-            [:div {:style {:flex "1"}}  pr3]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp4]
-            [:div {:style {:flex "1"}}  pr4]
-          ]]]
-      [:div {:style {:flex "3"}}
-      (str (mat/add (buy-call sp1 pr1) (mat/mul 3 (sell-call sp3 pr3)) (mat/mul 2 (buy-call sp4 pr4))))
-      ]])))
 
 (defn sell-1-3-2-butterfly []
   (fn []
@@ -180,37 +149,6 @@
             [:div {:style {:flex "1"}}  pr4]
           ]]]])))
 
-(defn sell-1-3-2-butterfly-old []
-  (fn []
-  (let [sp1 (:strike-price @app-state)
-        span (:span @app-state)
-        sp2 (+ sp1 span)
-        sp3 (+ sp1 (* 2 span))
-        sp4 (+ sp1 (* 3 span))
-        pr1 (get-premium sp1)
-        pr2 (get-premium sp2)
-        pr3 (get-premium sp3)
-        pr4 (get-premium sp4)]
-  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
-      [:div {:style {:flex "1"}}
-        [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-          [:div {:style {:flex "1"}} "Sell 1-3-2 Butterfly  "]
-          [:div {:style {:flex "1"}} "Premium "]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp1]
-            [:div {:style {:flex "1"}}  pr1]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp3]
-            [:div {:style {:flex "1"}}  pr3]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp4]
-            [:div {:style {:flex "1"}}  pr4]
-          ]]]
-      [:div {:style {:flex "3"}}
-      (str (mat/add (sell-call sp1 pr1) (mat/mul 3 (buy-call sp3 pr3)) (mat/mul 2 (sell-call sp4 pr4))))
-      ]])))
 
 (defn sell-butterfly []
   (fn []
@@ -238,7 +176,7 @@
             [:div {:style {:flex "1"}}  pr3]
           ]]]])))
 
-(defn sell-butterfly-old []
+(defn buy-call-ladder []
   (fn []
   (let [sp1 (:strike-price @app-state)
         span (:span @app-state)
@@ -250,7 +188,6 @@
   [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
       [:div {:style {:flex "1"}}
         [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-          [:div {:style {:flex "1"}} "Sell Butterfly  "]
           [:div {:style {:flex "1"}} "Premium "]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp1]
@@ -260,43 +197,7 @@
             [:div {:style {:flex "1"}}  sp2]
             [:div {:style {:flex "1"}}  pr2]
           ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp3]
-            [:div {:style {:flex "1"}}  pr3]
-          ]]]
-      [:div {:style {:flex "3"}}
-      (str (mat/add (sell-call sp1 pr1) (mat/mul 2 (buy-call sp2 pr2)) (sell-call sp3 pr3)))
-      ]])))
-
-(defn buy-butterfly-old []
-  (fn []
-  (let [sp1 (:strike-price @app-state)
-        span (:span @app-state)
-        sp2 (+ sp1 span)
-        sp3 (+ sp1 (* 2 span))
-        pr1 (get-premium sp1)
-        pr2 (get-premium sp2)
-        pr3 (get-premium sp3)]
-  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
-      [:div {:style {:flex "1"}}
-        [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-          [:div {:style {:flex "1"}} "Buy Butterfly  "]
-          [:div {:style {:flex "1"}} "Premium "]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp1]
-            [:div {:style {:flex "1"}}  pr1]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp2]
-            [:div {:style {:flex "1"}}  pr2]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp3]
-            [:div {:style {:flex "1"}}  pr3]
-          ]]]
-      [:div {:style {:flex "3"}}
-      (str (mat/add (buy-call sp1 pr1) (mat/mul 2 (sell-call sp2 pr2)) (buy-call sp3 pr3)))
-      ]])))
+        ]]])))
 
 (defn buy-butterfly []
   (fn []
@@ -337,6 +238,28 @@
           [rui/card-header "Buy Butterfly"]
           [rui/card-text "Details for this strategy"]
           [buy-butterfly]
+          [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
+              [:div {:style {:flex "1"} :on-click #()}  
+                  [ui/icon-button {:tooltip "Execute " :tooltip-position "bottom-right"}
+                          (ic/content-send)]]
+              [:div {:style {:flex "1"} :on-click #()}  
+                  [ui/icon-button {:tooltip "Save " :tooltip-position "bottom-right"}
+                          (ic/content-save)]]
+                          ]])))
+
+(defn buy-call-ladder-card []
+  (fn []
+  (let [sp1 (:strike-price @app-state)
+        span (:span @app-state)
+        sp2 (+ sp1 span)
+        sp3 (+ sp1 (* 2 span))
+        pr1 (get-premium sp1)
+        pr2 (get-premium sp2)
+        pr3 (get-premium sp3)]
+  [rui/card 
+          [rui/card-header "Buy Call ladder"]
+          [rui/card-text "Details for this strategy"]
+          [buy-call-ladder]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
                   [ui/icon-button {:tooltip "Execute " :tooltip-position "bottom-right"}
@@ -442,21 +365,6 @@
     [:div.col-md-12
      (str "this is the story of optiontrader. More to come") ]]])
 
-(defn home-page-old []
-  [:div.container
-   [:div.jumbotron
-    [:h1 "Welcome to optiontrader"]
-    [:p "Time to start building your site!"]
-    [:p [:a.btn.btn-primary.btn-lg {:href "http://luminusweb.net"} "Learn more »"]]]
-   [:div.row
-    [:div.col-md-12
-     [:h2 "Welcome to ClojureScript"]]]
-   (when-let [docs (session/get :docs)]
-     [:div.row
-      [:div.col-md-12
-       [:div {:dangerouslySetInnerHTML
-              {:__html (md->html docs)}}]]])])
-
 (defn update-strike-price [strike-price]
   (let [strike-price (reader/read-string strike-price)
         sp1 strike-price
@@ -472,6 +380,8 @@
   (swap! app-state assoc-in [:chart-config :series] [
     {:name "Buy Butterfly" 
      :data (mat/add (buy-call sp1 pr1) (mat/mul 2 (sell-call sp2 pr2)) (buy-call sp3 pr3))}
+    {:name "Buy Call Ladder" 
+     :data (mat/add (sell-call sp1 pr1) (mat/mul 2 (buy-call sp2 pr2)))}
     {:name "Sell Butterfly" 
      :data (mat/add (sell-call sp1 pr1) (mat/mul 2 (buy-call sp2 pr2)) (sell-call sp3 pr3))}
     {:name "Buy 1-3-2 Butterfly" 
@@ -509,6 +419,7 @@
       (print (str "template-def - " template-def))
     (cond (= template-def "") [buy-butterfly-card]
               (= template-def "buy-butterfly") [buy-butterfly-card]
+              (= template-def "buy-call-ladder") [buy-call-ladder-card]
               (= template-def "sell-butterfly") [sell-butterfly-card]
               (= template-def "buy-1-3-2-butterfly") [buy-1-3-2-butterfly-card]
               (= template-def "sell-1-3-2-butterfly") [sell-1-3-2-butterfly-card]))))
@@ -517,17 +428,13 @@
   (fn []
     [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
         [rui/drop-down-menu {:value "" 
-        :on-change (fn [e index value] 
-                     (print (str "dropdown-click" e index value))
-
-        (cond (= value "buy-butterfly") (swap! app-state assoc-in [:selected-strategy] value)
-        (= value "sell-butterfly") (swap! app-state assoc-in [:selected-strategy] value)
-        (= value "buy-1-3-2-butterfly") (swap! app-state assoc-in [:selected-strategy] value)
-        (= value "sell-1-3-2-butterfly") (swap! app-state assoc-in [:selected-strategy] value))
-                                                       )}
+                            :on-change (fn [e index value] 
+                                         (print (str "dropdown-click" e index value))
+                                         (swap! app-state assoc-in [:selected-strategy] value))}
          [rui/menu-item {:value "" :primary-text"Select Strategy to execute"}]
          [rui/menu-item {:value "buy-butterfly" :primary-text "Buy Butterfly"}]
          [rui/menu-item {:value "sell-butterfly"} "Sell butterfly"]
+         [rui/menu-item {:value "buy-call-ladder"} "Buy Call ladder"]
          [rui/menu-item {:value "buy-1-3-2-butterfly"} "Buy 1-3-2 butterfly"]
          [rui/menu-item {:value "sell-1-3-2-butterfly"} "Sell 1-3-2 butterfly"]]]))
 
@@ -562,8 +469,9 @@
           [:div {:style {:display "flex" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
           [:div {:style {:flex "1"}} 
            [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
-                [:h4 "This is a tool to identify standard strategies to trade in Nifty"]
-                [:h4 "please enter the strike price "]]]
+                [:h4 "Option Strategy screener for Nifty"]
+                [:h4 "please enter the strike price and the system will automatically pick"]
+                [:h4 "the latest price for the spread "]]]
           [:div {:style {:flex "1"}} 
            [rui/paper  {:zDepth 4}
                   [rui/text-field
@@ -642,4 +550,5 @@
   (load-interceptors!)
   (fetch-docs!)
   (hook-browser-navigation!)
-  (mount-components))
+  (mount-components)
+  (update-strike-price "7600"))
