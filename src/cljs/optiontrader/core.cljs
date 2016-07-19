@@ -142,7 +142,7 @@
           [:div {:style {:flex "1"}} "Premium "]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
             [:div {:style {:flex "1"}}  sp1]
-            [:div {:style {:flex "1"}}  "Buy 1 lot"]
+            [:div {:style {:flex "1"}}  "Sell 1 lot"]
             [:div {:style {:flex "1"}}  pr1]
           ]
           [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
