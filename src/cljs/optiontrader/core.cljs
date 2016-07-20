@@ -277,8 +277,7 @@
      :data (mat/add (buy-call sp1 pr1) (sell-call sp2 pr2) (sell-call sp3 pr3) (buy-call sp4 pr4))}
     {:name "Sell Broken Wing Butterfly"
      :data (mat/add (sell-call sp1 pr1) (mat/mul 3 (buy-call sp3 pr3)) (mat/mul 2 (sell-call sp4 pr4)))}
-    {:name "Trading range histogram - 24 months" 
-     :data [25 7 90 10 120 200 110 90 68 26]}
+    ;{:name "Trading range histogram - 24 months" :data [25 7 90 10 120 200 110 90 68 26]}
  
     ])
   (swap! app-state assoc-in [:strike-price] strike-price)
