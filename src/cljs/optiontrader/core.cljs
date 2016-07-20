@@ -17,6 +17,7 @@
   (:import goog.History))
 
 (def app-state (reagent/atom {:strike-price 8200 
+                        :selected-strategy "buy-butterfly"
                         :span 100
                         :chart-config
                               {:chart {:type "line" :events {:click (fn [event] (print event)
@@ -49,6 +50,50 @@
                                         {:name "Sell Broken wing Butterfly"
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
                                         ]}}))
+
+(def strategy-guide {:buy-butterfly {
+                          :header "Buy Butterfly" 
+                          :detail (str "The butterfly spread is a neutral strategy that is a combination of a 
+                                        bull spread and a bear spread. It is a limited profit, limited risk 
+                                        options strategy. There are 3 striking prices involved in a butterfly 
+                                        spread and it can be constructed using calls or puts.")
+                          :orders [{:sp 0 :order "Buy 1 Lots" :pr 0}
+                                   {:sp 1 :order "Sell 2 Lots" :pr 1}
+                                   {:sp 2 :order "Buy 1 Lots" :pr 2}]}
+                     :sell-butterfly {
+                          :header "Sell Butterfly"
+                          :detail "This is the converse of buying a butterfly spread"
+                          :orders [{:sp 0 :order "Sell 1 Lots" :pr 0}
+                                   {:sp 1 :order "Buy 2 Lots" :pr 1}
+                                   {:sp 2 :order "Sell 1 Lots" :pr 2}]}
+                     :buy-broken-wing-butterfly {
+                          :header "Buy Broken Wing Butterfly"
+                          :detail (str "In this strategy a short call spread is embedded inside a long call 
+                            butterfly spread. A Broken Wing Butterfly is a long butterfly spread with 
+                            long strikes that are not equidistant from the short strike. This leads to one 
+                            side having greater risk than the other, which makes the trade slightly more 
+                            directional than a standard long butterfly spread")
+                          :orders [{:sp 0 :order "Buy 1 Lots" :pr 0}
+                                   {:sp 2 :order "Sell 3 Lots" :pr 2}
+                                   {:sp 3 :order "Buy 2 Lots" :pr 3}]}
+                     :sell-broken-wing-butterfly {
+                          :header "Sell Broken Wing butterfly"
+                          :detail "This is the converse of Buying a Broken wing butterfly"
+                          :orders [{:sp 0 :order "Sell 1 Lots" :pr 0}
+                                   {:sp 2 :order "Buy 3 Lots" :pr 2}
+                                   {:sp 3 :order "Sell 2 Lots" :pr 3}]}
+                     :buy-call-ladder {
+                          :header "Buy Call Ladder"
+                          :detail (str "The call backspread (reverse call ratio spread) is a bullish 
+                            strategy in options trading that involves selling a number of call options 
+                            and buying more call options of the same underlying stock and expiration 
+                            date at a higher strike price. It is an unlimited profit, limited risk options 
+                            trading strategy that is taken when the options trader thinks that the 
+                            underlying stock will experience significant upside movement in the near term.")
+                          :orders [{:sp 0 :order "Sell 1 Lots" :pr 0}
+                                   {:sp 1 :order "Buy 2 Lots" :pr 1}]
+
+                      }})
 
 (defn matops []
   (let [a [1 2]
@@ -97,154 +142,34 @@
             (- % strike-price (- 0 premium))) 
             stock-range))
 
-(defn buy-1-3-2-butterfly []
+(defn strategy-details [strategy-type]
   (fn []
+
   (let [sp1 (:strike-price @app-state)
         span (:span @app-state)
         sp2 (+ sp1 span)
         sp3 (+ sp1 (* 2 span))
         sp4 (+ sp1 (* 3 span))
+        sp-vector [sp1 sp2 sp3 sp4]
         pr1 (get-premium sp1)
         pr2 (get-premium sp2)
         pr3 (get-premium sp3)
-        pr4 (get-premium sp4)]
-
+        pr4 (get-premium sp4)
+        pr-vector [pr1 pr2 pr3 pr4]
+        order-vector  (:orders ((keyword strategy-type) strategy-guide))]
+  
   [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
       [:div {:style {:flex "1"}}
-        [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-          [:div {:style {:flex "1"}} "Premium "]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp1]
-            [:div {:style {:flex "1"}}  "Buy 1 lot"]
-            [:div {:style {:flex "1"}}  pr1]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp3]
-            [:div {:style {:flex "1"}}  "Sell 3 lot"]
-            [:div {:style {:flex "1"}}  pr3]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp4]
-            [:div {:style {:flex "1"}}  "Buy 2 lot"]
-            [:div {:style {:flex "1"}}  pr4]
-          ]]]])))
+        [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}   
+           (for [xt order-vector]
+            ^{:key (str "v-" (:sp xt))}
+            [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
+              [:div {:style {:flex "1"}} (get sp-vector (:sp xt))]
+              [:div {:style {:flex "1"}} (:order xt)]
+              [:div {:style {:flex "1"}} (get pr-vector (:pr xt))]]
+            )]]])))
 
-(defn sell-1-3-2-butterfly []
-  (fn []
-  (let [sp1 (:strike-price @app-state)
-        span (:span @app-state)
-        sp2 (+ sp1 span)
-        sp3 (+ sp1 (* 2 span))
-        sp4 (+ sp1 (* 3 span))
-        pr1 (get-premium sp1)
-        pr2 (get-premium sp2)
-        pr3 (get-premium sp3)
-        pr4 (get-premium sp4)]
-  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
-      [:div {:style {:flex "1"}}
-        [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-          [:div {:style {:flex "1"}} "Premium "]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp1]
-            [:div {:style {:flex "1"}}  "Sell 1 lot"]
-            [:div {:style {:flex "1"}}  pr1]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp3]
-            [:div {:style {:flex "1"}}  "Buy 3 lot"]
-            [:div {:style {:flex "1"}}  pr3]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp4]
-            [:div {:style {:flex "1"}}  "Sell 2 lot"]
-            [:div {:style {:flex "1"}}  pr4]
-          ]]]])))
-
-
-(defn sell-butterfly []
-  (fn []
-  (let [sp1 (:strike-price @app-state)
-        span (:span @app-state)
-        sp2 (+ sp1 span)
-        sp3 (+ sp1 (* 2 span))
-        pr1 (get-premium sp1)
-        pr2 (get-premium sp2)
-        pr3 (get-premium sp3)]
-  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
-      [:div {:style {:flex "1"}}
-        [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-          [:div {:style {:flex "1"}} "Premium "]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp1]
-            [:div {:style {:flex "1"}}  "Sell 1 lot"]
-            [:div {:style {:flex "1"}}  pr1]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp2]
-            [:div {:style {:flex "1"}}  "Buy 2 lot"]
-            [:div {:style {:flex "1"}}  pr2]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp3]
-            [:div {:style {:flex "1"}}  "Sell 1 lot"]
-            [:div {:style {:flex "1"}}  pr3]
-          ]]]])))
-
-(defn buy-call-ladder []
-  (fn []
-  (let [sp1 (:strike-price @app-state)
-        span (:span @app-state)
-        sp2 (+ sp1 span)
-        sp3 (+ sp1 (* 2 span))
-        pr1 (get-premium sp1)
-        pr2 (get-premium sp2)
-        pr3 (get-premium sp3)]
-  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
-      [:div {:style {:flex "1"}}
-        [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-          [:div {:style {:flex "1"}} "Premium "]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp1]
-            [:div {:style {:flex "1"}}  "Sell 1 lot"]
-            [:div {:style {:flex "1"}}  pr1]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp2]
-            [:div {:style {:flex "1"}}  "Buy 2 lot"]
-            [:div {:style {:flex "1"}}  pr2]
-          ]
-        ]]])))
-
-(defn buy-butterfly []
-  (fn []
-  (let [sp1 (:strike-price @app-state)
-        span (:span @app-state)
-        sp2 (+ sp1 span)
-        sp3 (+ sp1 (* 2 span))
-        pr1 (get-premium sp1)
-        pr2 (get-premium sp2)
-        pr3 (get-premium sp3)]
-  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
-      [:div {:style {:flex "1"}}
-        [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-          [:div {:style {:flex "1"}} "Premium "]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp1]
-            [:div {:style {:flex "1"}}  "Buy 1 lot"]
-            [:div {:style {:flex "1"}}  pr1]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp2]
-            [:div {:style {:flex "1"}}  "Sell 2 lot"]
-            [:div {:style {:flex "1"}}  pr2]
-          ]
-          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-            [:div {:style {:flex "1"}}  sp3]
-            [:div {:style {:flex "1"}}  "Buy 1 lot"]
-            [:div {:style {:flex "1"}}  pr3]
-          ]]]])))
-
-(defn buy-butterfly-card []
+(defn strategy-card [strategy-type]
   (fn []
   (let [sp1 (:strike-price @app-state)
         span (:span @app-state)
@@ -254,108 +179,9 @@
         pr2 (get-premium sp2)
         pr3 (get-premium sp3)]
   [rui/card 
-          [rui/card-header "Buy Butterfly"]
-          [rui/card-text (str "The butterfly spread is a neutral strategy that is a combination of a bull spread and a bear spread. It is a limited profit, limited risk options strategy. There are 3 striking prices involved in a butterfly spread and it can be constructed using calls or puts.")]
-          [buy-butterfly]
-          [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
-              [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/raised-button {:label        "Execute"
-                        :icon         (ic/content-send)
-                        :on-touch-tap #()}]]
-              [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/raised-button {:label        "Save"
-                        :icon         (ic/content-save)
-                        :on-touch-tap #()}]]
-                          ]])))
-
-(defn buy-call-ladder-card []
-  (fn []
-  (let [sp1 (:strike-price @app-state)
-        span (:span @app-state)
-        sp2 (+ sp1 span)
-        sp3 (+ sp1 (* 2 span))
-        pr1 (get-premium sp1)
-        pr2 (get-premium sp2)
-        pr3 (get-premium sp3)]
-  [rui/card 
-          [rui/card-header "Buy Call ladder"]
-          [rui/card-text (str "The call backspread (reverse call ratio spread) is a bullish strategy in options trading that involves selling a number of call options and buying more call options of the same underlying stock and expiration date at a higher strike price. It is an unlimited profit, limited risk options trading strategy that is taken when the options trader thinks that the underlying stock will experience significant upside movement in the near term.")]
-          [buy-call-ladder]
-          [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
-              [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/raised-button {:label        "Execute"
-                        :icon         (ic/content-send)
-                        :on-touch-tap #()}]]
-              [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/raised-button {:label        "Save"
-                        :icon         (ic/content-save)
-                        :on-touch-tap #()}]]
-                          ]])))
-
-
-(defn sell-butterfly-card []
-  (fn []
-  (let [sp1 (:strike-price @app-state)
-        span (:span @app-state)
-        sp2 (+ sp1 span)
-        sp3 (+ sp1 (* 2 span))
-        pr1 (get-premium sp1)
-        pr2 (get-premium sp2)
-        pr3 (get-premium sp3)]
-  [rui/card 
-          [rui/card-header "Sell Butterfly"]
-          [rui/card-text (str "This is the converse of buying a butterfly spread")]
-          [sell-butterfly]
-          [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
-              [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/raised-button {:label        "Execute"
-                        :icon         (ic/content-send)
-                        :on-touch-tap #()}]]
-              [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/raised-button {:label        "Save"
-                        :icon         (ic/content-save)
-                        :on-touch-tap #()}]]
-                          ]])))
-
-(defn sell-1-3-2-butterfly-card []
-  (fn []
-  (let [sp1 (:strike-price @app-state)
-        span (:span @app-state)
-        sp2 (+ sp1 span)
-        sp3 (+ sp1 (* 2 span))
-        pr1 (get-premium sp1)
-        pr2 (get-premium sp2)
-        pr3 (get-premium sp3)]
-
-  [rui/card 
-          [rui/card-header "Sell Broken Wing Butterfly"]
-          [rui/card-text (str "This is the converse of Buying a Broken wing butterfly")]
-          [sell-1-3-2-butterfly]
-          [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
-              [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/raised-button {:label        "Execute"
-                        :icon         (ic/content-send)
-                        :on-touch-tap #()}]]
-              [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/raised-button {:label        "Save"
-                        :icon         (ic/content-save)
-                        :on-touch-tap #()}]]
-                          ]])))
-
-(defn buy-1-3-2-butterfly-card []
-  (fn []
-  (let [sp1 (:strike-price @app-state)
-        span (:span @app-state)
-        sp2 (+ sp1 span)
-        sp3 (+ sp1 (* 2 span))
-        pr1 (get-premium sp1)
-        pr2 (get-premium sp2)
-        pr3 (get-premium sp3)]
-
-  [rui/card 
-          [rui/card-header "Buy Broken Wing Butterfly"]
-          [rui/card-text (str "In this strategy a short call spread is embedded inside a long call butterfly spread. A Broken Wing Butterfly is a long butterfly spread with long strikes that are not equidistant from the short strike. This leads to one side having greater risk than the other, which makes the trade slightly more directional than a standard long butterfly spread")]
-          [buy-1-3-2-butterfly]
+          [rui/card-header (:header ((keyword strategy-type) strategy-guide))]
+          [rui/card-text (:detail ((keyword strategy-type) strategy-guide))]
+          [(strategy-details strategy-type)]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
                   [ui/raised-button {:label        "Execute"
@@ -461,12 +287,7 @@
   (fn []  
     (let [template-def (:selected-strategy @app-state)]
       (print (str "template-def - " template-def))
-    (cond (= template-def "") [buy-butterfly-card]
-              (= template-def "buy-butterfly") [buy-butterfly-card]
-              (= template-def "buy-call-ladder") [buy-call-ladder-card]
-              (= template-def "sell-butterfly") [sell-butterfly-card]
-              (= template-def "buy-1-3-2-butterfly") [buy-1-3-2-butterfly-card]
-              (= template-def "sell-1-3-2-butterfly") [sell-1-3-2-butterfly-card]))))
+      [(strategy-card template-def)])))
 
 (defn strategy-dropdown []
   (fn []
@@ -479,8 +300,8 @@
          [rui/menu-item {:value "buy-butterfly" :primary-text "Buy Butterfly"}]
          [rui/menu-item {:value "sell-butterfly"} "Sell butterfly"]
          [rui/menu-item {:value "buy-call-ladder"} "Buy Call ladder"]
-         [rui/menu-item {:value "buy-1-3-2-butterfly"} "Buy Broken Wing butterfly"]
-         [rui/menu-item {:value "sell-1-3-2-butterfly"} "Sell Broken Wing butterfly"]]]))
+         [rui/menu-item {:value "buy-broken-wing-butterfly"} "Buy Broken Wing butterfly"]
+         [rui/menu-item {:value "sell-broken-wing-butterfly"} "Sell Broken Wing butterfly"]]]))
 
 (defn strategies-comp []
   (fn []
@@ -506,6 +327,7 @@
           [:div {:style {:flex "1"}} [(get-selected-strategy)]]
         ]]]))
 
+(comment
 (defn strategies-comp-old []
   (fn []
     [:div {:style {:display "flex" :flex-direction "row" :padding "10px" :flex-flow "row wrap"}}
@@ -546,6 +368,7 @@
           [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
                  [:div {:style {:flex "1"}} "Executed Strategies"]
               ]]]]]))
+)
 
 (defn home-page []
   (fn []
