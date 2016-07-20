@@ -394,7 +394,7 @@
   [:div.container
    [:div.row
     [:div.col-md-12
-     (str "Developed by Xpertview analytics. This app is the culmination of personal experience in trading options in the Indian Stock Market\n" "Various strategies suggested have been based on literature survey \n" "More to come ..... in the exciting world of Option Trading!!!") ]]])
+     (str "Developed by Xpertview analytics. This app is the culmination of personal experience in trading options in the Indian Stock Market.\n" "Various strategies suggested have been based on literature survey. \n" "More to come ..... in the exciting world of Option Trading!!!") ]]])
 
 (defn recommendations-page []
   [:div.container
