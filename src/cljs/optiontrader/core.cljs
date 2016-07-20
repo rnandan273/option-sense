@@ -382,13 +382,28 @@
         [:a.navbar-brand {:href "#/"} "optiontrader"]
         [:ul.nav.navbar-nav
          [nav-link "#/" "Home" :home collapsed?]
+         [nav-link "#/mystrategies" "My Strategies" :mystrategies collapsed?]
+         [nav-link "#/recommendations" "Recommendations" :recommendations collapsed?]
          [nav-link "#/about" "About" :about collapsed?]]]])))
 
 (defn about-page []
   [:div.container
    [:div.row
     [:div.col-md-12
-     (str "this is the story of optiontrader. More to come") ]]])
+     (str "This app is the culmination of personal experience in trading options in the Indian Stock Market\n" "Various strategies suggested have been based on literature survey \n" "More to come ..... in the exciting world of Option Trading!!!") ]]])
+
+(defn recommendations-page []
+  [:div.container
+   [:div.row
+    [:div.col-md-12
+     (str "Recommended strategies based on your trading history and prevailing market conditions") ]]])
+
+
+(defn mystrategies-page []
+  [:div.container
+   [:div.row
+    [:div.col-md-12
+     (str "View all your saved and executed strategies\n" "You can experiment with hedging your positions by using complementary strategies.\n"  "This is Work in progress") ]]])
 
 (defn update-strike-price [strike-price]
   (let [strike-price (reader/read-string strike-price)
@@ -536,6 +551,8 @@
 
 (def pages
   {:home #'home-page
+   :mystrategies #'mystrategies-page
+   :recommendations #'recommendations-page
    :about #'about-page})
 
 (defn page []
@@ -550,6 +567,12 @@
 
 (secretary/defroute "/about" []
   (session/put! :page :about))
+
+(secretary/defroute "/mystrategies" []
+  (session/put! :page :mystrategies))
+
+(secretary/defroute "/recommendations" []
+  (session/put! :page :recommendations))
 
 ;; -------------------------
 ;; History
