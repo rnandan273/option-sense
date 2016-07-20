@@ -16,17 +16,17 @@
             [cljs-react-material-ui.icons :as ic])
   (:import goog.History))
 
-(def app-state (reagent/atom {:strike-price 7700 
+(def app-state (reagent/atom {:strike-price 8200 
                         :span 100
                         :chart-config
                               {:chart {:type "line" :events {:click (fn [event] (print event)
                                 )}}
                                :title {:text "Strategies v/s strike prices"}
                                :subtitle {:text "Source: Xpertview analytics"}
-                               :xAxis {:categories ["7500" "7600" "7700" "7800" "7900" "8000" "8100" "8200" "8300" "8400"]
+                               :xAxis {:categories ["7900" "8000" "8100" "8200" "8300" "8400" "8500" "8600" "8700" "8800" "8900"]
                                        :title {:text "Nifty"}}
-                               :yAxis {:min -200
-                                       :title {:text "Payoff"
+                               :yAxis {:min -300
+                                       :title {:text "Payoff -- ( Nifty points )"
                                                :align "high"}
                                        :labels {:overflow "justify"}}
                                :tooltip {:valueSuffix " rupees"}
@@ -36,7 +36,7 @@
                                         :verticalAlign "top"
                                         :x -40
                                         :y 100
-                                        :floating true
+                                        :floating false
                                         :borderWidth 1
                                         :shadow true}
                                :credits {:enabled false}
@@ -59,15 +59,19 @@
 
 (defn get-premium [strike-price]
   ;(print "Premiun for - : " strike-price)
-  (cond (= strike-price 7500) 230
-        (= strike-price 7600) 190
-        (= strike-price 7700) 120
-        (= strike-price 7800) 80
-        (= strike-price 7900) 50
-        (= strike-price 8000) 35
-        (= strike-price 8100) 15))
+  (cond 
+        (= strike-price 7900) 530
+        (= strike-price 8000) 430
+        (= strike-price 8100) 330
+        (= strike-price 8200) 230
+        (= strike-price 8300) 190
+        (= strike-price 8400) 120
+        (= strike-price 8500) 80
+        (= strike-price 8600) 50
+        (= strike-price 8700) 35
+        (= strike-price 8800) 15))
 
-(def stock-range (map #(+ 7500 (* % 100)) (range 10)))
+(def stock-range (map #(+ 7900 (* % 100)) (range 10)))
 
 (defn buy-call [strike-price premium]
   (map #(if (> strike-price %) 
@@ -390,7 +394,7 @@
   [:div.container
    [:div.row
     [:div.col-md-12
-     (str "This app is the culmination of personal experience in trading options in the Indian Stock Market\n" "Various strategies suggested have been based on literature survey \n" "More to come ..... in the exciting world of Option Trading!!!") ]]])
+     (str "Developed by Xpertview analytics. This app is the culmination of personal experience in trading options in the Indian Stock Market\n" "Various strategies suggested have been based on literature survey \n" "More to come ..... in the exciting world of Option Trading!!!") ]]])
 
 (defn recommendations-page []
   [:div.container
@@ -481,7 +485,7 @@
 (defn strategies-comp []
   (fn []
     [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
-      [:div {:style {:flex "1"}} 
+      [:div {:style {:flex "2"}} 
           [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
           [:div {:style {:flex "1"}} 
            [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
@@ -490,7 +494,7 @@
           [:div {:style {:flex "1"}} 
            [rui/paper  {:zDepth 4}
                   [rui/text-field
-                          {:floatingLabelText "Enter Nifty strike price eg: 7500"
+                          {:floatingLabelText "Enter Nifty strike price eg: 8200"
                             :full-width false
                             :value (:strike-price @app-state)
                             :on-change #(update-strike-price (.. % -target -value))
@@ -516,7 +520,7 @@
            [rui/paper  {:zDepth 4}
                   [rui/text-field
                           {
-                          :floatingLabelText "Enter Nifty strike price eg: 7500"
+                          :floatingLabelText "Enter Nifty strike price eg: 8300"
                           :full-width false
                           :value (:strike-price @app-state)
                           :on-change #(update-strike-price (.. % -target -value))
@@ -599,4 +603,4 @@
   (fetch-docs!)
   (hook-browser-navigation!)
   (mount-components)
-  (update-strike-price "7600"))
+  (update-strike-price "8200"))
