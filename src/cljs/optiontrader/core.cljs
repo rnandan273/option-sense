@@ -60,12 +60,14 @@
                           :orders [{:sp 0 :order "Buy 1 Lots" :pr 0}
                                    {:sp 1 :order "Sell 2 Lots" :pr 1}
                                    {:sp 2 :order "Buy 1 Lots" :pr 2}]}
+
                      :sell-butterfly {
                           :header "Sell Butterfly"
                           :detail "This is the converse of buying a butterfly spread"
                           :orders [{:sp 0 :order "Sell 1 Lots" :pr 0}
                                    {:sp 1 :order "Buy 2 Lots" :pr 1}
                                    {:sp 2 :order "Sell 1 Lots" :pr 2}]}
+
                      :buy-broken-wing-butterfly {
                           :header "Buy Broken Wing Butterfly"
                           :detail (str "In this strategy a short call spread is embedded inside a long call 
@@ -76,12 +78,14 @@
                           :orders [{:sp 0 :order "Buy 1 Lots" :pr 0}
                                    {:sp 2 :order "Sell 3 Lots" :pr 2}
                                    {:sp 3 :order "Buy 2 Lots" :pr 3}]}
+
                      :sell-broken-wing-butterfly {
                           :header "Sell Broken Wing butterfly"
                           :detail "This is the converse of Buying a Broken wing butterfly"
                           :orders [{:sp 0 :order "Sell 1 Lots" :pr 0}
                                    {:sp 2 :order "Buy 3 Lots" :pr 2}
                                    {:sp 3 :order "Sell 2 Lots" :pr 3}]}
+
                      :buy-call-ladder {
                           :header "Buy Call Ladder"
                           :detail (str "The call backspread (reverse call ratio spread) is a bullish 
@@ -158,7 +162,7 @@
         pr-vector [pr1 pr2 pr3 pr4]
         order-vector  (:orders ((keyword strategy-type) strategy-guide))]
   
-  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
+  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :padding-left "10px" :flex-direction "row" :flex-flow "row wrap"}}
       [:div {:style {:flex "1"}}
         [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}   
            (for [xt order-vector]
@@ -305,13 +309,12 @@
 
 (defn strategies-comp []
   (fn []
+    [:div 
+  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
+    [:h5 "Explore Option strategies at selected Nifty Strike Price"]]
     [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
       [:div {:style {:flex "2"}} 
           [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-          [:div {:style {:flex "1"}} 
-           [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
-                [:h5 "This is a tool to view classical option strategies for Nifty"]
-                [:h5 "please enter the strike price "]]]
           [:div {:style {:flex "1"}} 
            [rui/paper  {:zDepth 4}
                   [rui/text-field
@@ -324,8 +327,9 @@
       [:div {:style {:flex "1"}} 
         [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
           [:div {:style {:flex "1"}}  [strategy-dropdown] ]
+          [:div {:style {:flex "1"}}  [:br]] 
           [:div {:style {:flex "1"}} [(get-selected-strategy)]]
-        ]]]))
+        ]]]]))
 
 (comment
 (defn strategies-comp-old []
