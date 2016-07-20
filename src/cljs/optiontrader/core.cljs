@@ -495,8 +495,8 @@
           [:div {:style {:flex "1"}} 
            [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
                 [:h4 "Option Strategy screener for Nifty"]
-                [:h4 "please enter the strike price and the system will automatically pick"]
-                [:h4 "the latest price for the spread "]]]
+                [:h4 "Choose a strike price and view the classical option strategies"]
+                [:h4 "Note that the system picks up the last traded price of the options"]]]
           [:div {:style {:flex "1" :align-content "center"}} 
            [rui/paper  {:zDepth 4}
                   [rui/text-field
