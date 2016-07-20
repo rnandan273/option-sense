@@ -310,12 +310,12 @@
 (defn strategies-comp []
   (fn []
     [:div 
-  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
+  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
     [:h5 "Explore Option strategies at selected Nifty Strike Price"]]
     [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
       [:div {:style {:flex "2"}} 
           [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-          [:div {:style {:flex "1"}} 
+          [:div {:style {:flex "1" :padding "10px"}} 
            [rui/paper  {:zDepth 4}
                   [rui/text-field
                           {:floatingLabelText "Enter Nifty strike price eg: 8200"
