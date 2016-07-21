@@ -29,6 +29,7 @@
                  [net.mikera/core.matrix "0.52.2"]
                  [cljs-react-material-ui "0.2.19"]
                  [cljsjs/highcharts "4.2.2-2"]
+                 [org.clojure/core.match "0.3.0-alpha4"]
                  [org.webjars/webjars-locator-jboss-vfs "0.1.0"]
                  [luminus-immutant "0.2.2"]]
 
