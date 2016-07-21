@@ -355,7 +355,6 @@
                                          )
                          }]
           ]
-          [:div {:style {:flex "1"}} [:h2 ""]]
           [:div {:style {:flex "1"}} [highchart-component]]]]]
       [:div {:style {:flex "1"}} 
         [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
