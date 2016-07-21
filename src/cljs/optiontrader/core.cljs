@@ -208,7 +208,8 @@
         pr-vector [pr1 pr2 pr3 pr4]
         order-vector  (:orders ((keyword strategy-type) strategy-guide))]
   
-  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :padding-left "10px" :flex-direction "row" :flex-flow "row wrap"}}
+  ;[rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :padding-left "10px" :flex-direction "row" :flex-flow "row wrap"}}
+      [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
       [:div {:style {:flex "1"}}
         [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}   
            (for [xt order-vector]
@@ -311,7 +312,7 @@
  
     ])
   (swap! app-state assoc-in [:strike-price] strike-price)
-  (print (@app-state :chart-config))
+ ; (print (@app-state :chart-config))
 ))
 
 
@@ -439,16 +440,6 @@
       {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue500)}})}
         [strategies-comp]]))
 
-
-(defn delete-pending-order-old [order]
-  (print "DELETING " (:order (get order 1)) (:id (get order 1)))
-  ;(print (map #(print (:id (get % 1))) (:pending-orders @app-state)))
-  (let [curr-arr (filter #(not= (:id (get order 1)) (:id (get % 1))) (:pending-orders @app-state))]
-    (print curr-arr (count curr-arr))
-
-
-      (swap! app-state assoc-in [:pending-orders] curr-arr)))
-
 (defn delete-pending-order [order]
   (print "DELETING " (:order (get order 1)) (:id (get order 1)))
   ;(print (map #(print (:id (get % 1))) (:pending-orders @app-state)))
@@ -460,7 +451,7 @@
 
 (defn add-to-pending-orders [option option-type order-type]
   ;((:current-option @app-state) (:current-option-type @app-state) (:current-order-type @app-state))
-  (print {:order order-type :option option :type option-type})
+  ;(print {:order order-type :option option :type option-type})
   ;(swap! (:pending-orders @app-state) conj {:order order-type :option option :type option-type})
   (swap! app-state assoc-in [:pending-orders (count (:pending-orders @app-state))] {:id (rand-int 100) :order order-type :option option :type option-type}))
 
@@ -528,9 +519,9 @@
 
               [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
                 [:div {:style {:flex "2"}}
-                    [rui/paper  {:zDepth 4} 
+                    ;[rui/paper  {:zDepth 4} 
                     [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-                    [:div {:style {:flex "1"}} [highchart-component]]]]]
+                    [:div {:style {:flex "1"}} [highchart-component]]]]
                     [:div {:style {:flex "1"}}
                     [rui/paper  {:zDepth 4}
                       [option-selector]]]]]]))
