@@ -16,7 +16,8 @@
             [cljs-react-material-ui.icons :as ic])
   (:import goog.History))
 
-(def app-state (reagent/atom {:strike-price 8200 
+(def app-state (reagent/atom {:base-strike-price 7900
+                        :strike-price 8200 
                         :selected-strategy "buy-butterfly"
                         :span 100
                         :chart-config
@@ -118,19 +119,21 @@
 
 (defn get-premium [strike-price]
   ;(print "Premiun for - : " strike-price)
+  (let [bp (:base-strike-price @app-state)
+        span (:span @app-state)]
   (cond 
-        (= strike-price 7900) 530
-        (= strike-price 8000) 430
-        (= strike-price 8100) 330
-        (= strike-price 8200) 230
-        (= strike-price 8300) 190
-        (= strike-price 8400) 120
-        (= strike-price 8500) 80
-        (= strike-price 8600) 50
-        (= strike-price 8700) 35
-        (= strike-price 8800) 15))
+        (= strike-price bp) 530
+        (= strike-price (+ bp (* 1 span))) 430
+        (= strike-price (+ bp (* 2 span))) 330
+        (= strike-price (+ bp (* 3 span))) 230
+        (= strike-price (+ bp (* 4 span))) 190
+        (= strike-price (+ bp (* 5 span))) 120
+        (= strike-price (+ bp (* 6 span))) 80
+        (= strike-price (+ bp (* 7 span))) 50
+        (= strike-price (+ bp (* 8 span))) 35
+        (= strike-price (+ bp (* 9 span))) 15)))
 
-(def stock-range (map #(+ 7900 (* % 100)) (range 10)))
+(def stock-range (map #(+ (:base-strike-price @app-state) (* % (:span @app-state))) (range 10)))
 
 (defn buy-call [strike-price premium]
   (map #(if (> strike-price %) 
@@ -331,17 +334,29 @@
   [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
     [:h5 "Explore Option strategies at selected Nifty Strike Price"]]
     [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
-      [:div {:style {:flex "2"}} 
+      [:div {:style {:flex "2"}}
+          [rui/paper  {:zDepth 4} 
           [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
           [:div {:style {:flex "1" :padding "10px"}} 
-           [rui/paper  {:zDepth 4}
+           ;[rui/paper  {:zDepth 4}
                   [rui/text-field
                           {:floatingLabelText "Enter Nifty strike price eg: 8200"
                             :full-width false
                             :value (:strike-price @app-state)
                             :on-change #(update-strike-price (.. % -target -value))
-                            }]]]
-          [:div {:style {:flex "1"}} [highchart-component]]]]
+                            }]
+          ;[:div {:style {:flex "1" :padding "10px"}} 
+            [rui/slider {:default-value 0.2
+                         :step 0.1
+                         :description "Or Use the Slider to select Nifty Strike price"
+                         :on-change (fn [e index value] 
+                                         (print (str "slider-click" e index (type value)))
+                                         (update-strike-price (str (+ (:base-strike-price @app-state)(* 1000 index))))
+                                         )
+                         }]
+          ]
+          [:div {:style {:flex "1"}} [:h2 ""]]
+          [:div {:style {:flex "1"}} [highchart-component]]]]]
       [:div {:style {:flex "1"}} 
         [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
           [:div {:style {:flex "1"}}  [strategy-dropdown] ]
@@ -448,4 +463,4 @@
   (fetch-docs!)
   (hook-browser-navigation!)
   (mount-components)
-  (update-strike-price "8200"))
+  (update-strike-price (str (+ (:base-strike-price @app-state) (* 2 (:span @app-state))))))
