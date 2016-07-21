@@ -18,9 +18,41 @@
 
 (def app-state (reagent/atom {:base-strike-price 7900
                         :strike-price 8200 
+                        :current-option 8100
                         :selected-strategy "buy-butterfly"
                         :span 100
                         :chart-config
+                              {:chart {:type "line" :events {:click (fn [event] (print event)
+                                )}}
+                               :title {:text "Strategies v/s strike prices"}
+                               :subtitle {:text "Source: Xpertview analytics"}
+                               :xAxis {:categories ["7900" "8000" "8100" "8200" "8300" "8400" "8500" "8600" "8700" "8800" "8900"]
+                                       :title {:text "Nifty"}}
+                               :yAxis {:min -300
+                                       :title {:text "Payoff -- ( Nifty points )"
+                                               :align "high"}
+                                       :labels {:overflow "justify"}}
+                               :tooltip {:valueSuffix " rupees"}
+                               :plotOptions {:bar {:dataLabels {:enabled true}}}
+                               :legend {:layout "vertical"
+                                        :align "right"
+                                        :verticalAlign "top"
+                                        :x -40
+                                        :y 100
+                                        :floating false
+                                        :borderWidth 1
+                                        :shadow true}
+                               :credits {:enabled false}
+                               :series [{:name "Buy Butterfly"
+                                         :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
+                                        {:name "Sell Butterfly"
+                                         :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
+                                        {:name "Buy Broken wing Butterfly"
+                                         :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
+                                        {:name "Sell Broken wing Butterfly"
+                                         :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
+                                        ]}
+                              :my-chart-config
                               {:chart {:type "line" :events {:click (fn [event] (print event)
                                 )}}
                                :title {:text "Strategies v/s strike prices"}
@@ -222,12 +254,12 @@
 (defn navbar []
   (let [collapsed? (reagent/atom true)]
     (fn []
-      [:nav.navbar.navbar-light.bg-faded
+      [:nav.navbar.navbar-light
        [:button.navbar-toggler.hidden-sm-up
         {:on-click #(swap! collapsed? not)} "☰"]
        [:div.collapse.navbar-toggleable-xs
         (when-not @collapsed? {:class "in"})
-        [:a.navbar-brand {:href "#/"} "optiontrader"]
+        [:a.navbar-brand {:href "#/"} "OptionsLab"]
         [:ul.nav.navbar-nav
          [nav-link "#/" "Home" :home collapsed?]
          [nav-link "#/mystrategies" "My Strategies" :mystrategies collapsed?]
@@ -238,7 +270,10 @@
   [:div.container
    [:div.row
     [:div.col-md-12
-     (str "Developed by Xpertview analytics. This app is the culmination of personal experience in trading options in the Indian Stock Market.\n" "Various strategies suggested have been based on literature survey. \n" "More to come ..... in the exciting world of Option Trading!!!") ]]])
+     "Developed by Xpertview analytics. This app is the culmination of personal experience in trading options in the Indian Stock Market."]]
+  [:div.row
+    [:div.col-md-12
+      "Various strategies suggested have been based on literature survey. More to come ..... in the exciting world of Option Trading!!!" ]]])
 
 (defn recommendations-page []
   [:div.container
@@ -247,11 +282,7 @@
      (str "Recommended strategies based on your trading history and prevailing market conditions") ]]])
 
 
-(defn mystrategies-page []
-  [:div.container
-   [:div.row
-    [:div.col-md-12
-     (str "View all your saved and executed strategies\n" "You can experiment with hedging your positions by using complementary strategies.\n"  "This is Work in progress") ]]])
+
 
 (defn update-strike-price [strike-price]
   (let [strike-price (reader/read-string strike-price)
@@ -411,6 +442,75 @@
     [rui/mui-theme-provider
       {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue500)}})}
         [strategies-comp]]))
+
+(defn option-selector []
+  (fn []
+    [:div {:style {:display "flex" :justify-content "center" :padding "10px" :flex-direction "column" :flex-flow "column wrap"}}
+      [:h5 "Use the slider to select the hedge"]
+      [:div {:style {:display "flex"  :flex-direction "row" :flex-flow "row wrap"}}
+        [:div {:style {:flex "3"}}
+           [rui/slider {:default-value 0.2
+                         :step 0.1
+                         :description (str "Selected Nifty Strike price " (:current-option @app-state))
+                         :on-change (fn [e index value] 
+                                         (print (str "slider-click" e index (type value)))
+                                         (swap! app-state assoc-in [:current-option] 
+                                          (+ (:base-strike-price @app-state)(* 1000 index)))
+                                         )
+                         }]]
+        [:div {:style {:flex "2"}}
+         [rui/radio-button-group {:name "option" 
+                                  :default-selected "call"
+                                  :on-change (fn [e index value] 
+                                                 (print (str "radiobutton-click" e index value))
+                                                 (swap! app-state assoc-in [:current-option-type] index))}
+           [rui/radio-button {:value "call" :label "Call"}]
+           [rui/radio-button {:value "put" :label "Put"}]
+         ]]
+         [:div {:style {:flex "2"}}
+         [rui/radio-button-group {:name "order" 
+                                  :default-selected "buy"
+                                  :on-change (fn [e index value] 
+                                                 (print (str "radiobutton-click" e index value))
+                                                 (swap! app-state assoc-in [:current-order-type] index))}
+           [rui/radio-button {:value "buy" :label "Buy"}]
+           [rui/radio-button {:value "sell" :label "Sell"}]
+         ]]
+
+      [:div {:style {:flex "0.5"} :on-click #(print (:current-option @app-state))}    
+            [ui/icon-button {:tooltip "Add to Strategy" :tooltip-position "bottom-right"}
+                        (ic/content-add-circle)]]]
+(comment
+      [:ul
+        (for [bp activity-bp-list]
+          ^{:key (str "bp2 -" (:id bp))}
+             [:li 
+               [:div {:style {:flex "1"} :on-click #()} 
+                        (:bullet-point bp) [:span "  "]
+                        [ui/icon-button {:tooltip "Delete selected bullet point" :tooltip-position "bottom-right"}
+                            (ic/action-delete)]]
+             ])]
+        )
+        ]))
+
+
+
+(defn mystrategies-page []
+   (fn []
+      [rui/mui-theme-provider
+          {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue500)}})}
+            [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
+              [:h5 "View all your saved and executed strategies\n"]
+              [:h5 "You can do a \"What If Hedge analysis \" to your positions and execute a trade"]
+
+              [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
+                [:div {:style {:flex "2"}}
+                    [rui/paper  {:zDepth 4} 
+                    [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
+                    [:div {:style {:flex "1"}} [highchart-component]]]]]
+                    [:div {:style {:flex "1"}}
+                    [rui/paper  {:zDepth 4}
+                      [option-selector]]]]]]))
 
 (def pages
   {:home #'home-page
