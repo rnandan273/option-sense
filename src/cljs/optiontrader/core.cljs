@@ -21,6 +21,7 @@
                         :current-option 8100
                         :selected-strategy "buy-butterfly"
                         :span 100
+                        :pending-orders {}
                         :chart-config
                               {:chart {:type "line" :events {:click (fn [event] (print event)
                                 )}}
@@ -234,14 +235,9 @@
           [(strategy-details strategy-type)]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/raised-button {:label        "Execute"
-                        :icon         (ic/content-send)
-                        :on-touch-tap #()}]]
+                  [ui/raised-button {:label "Execute" :on-touch-tap #()}]]
               [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/raised-button {:label        "Save"
-                        :icon         (ic/content-save)
-                        :on-touch-tap #()}]]
-                          ]])))
+                  [ui/raised-button {:label "Save" :on-touch-tap #()}]]]])))
 
 
 (defn nav-link [uri title page collapsed?]
@@ -443,6 +439,31 @@
       {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue500)}})}
         [strategies-comp]]))
 
+
+(defn delete-pending-order-old [order]
+  (print "DELETING " (:order (get order 1)) (:id (get order 1)))
+  ;(print (map #(print (:id (get % 1))) (:pending-orders @app-state)))
+  (let [curr-arr (filter #(not= (:id (get order 1)) (:id (get % 1))) (:pending-orders @app-state))]
+    (print curr-arr (count curr-arr))
+
+
+      (swap! app-state assoc-in [:pending-orders] curr-arr)))
+
+(defn delete-pending-order [order]
+  (print "DELETING " (:order (get order 1)) (:id (get order 1)))
+  ;(print (map #(print (:id (get % 1))) (:pending-orders @app-state)))
+  (let [curr-arr (filter #(not= (:id (get order 1)) (:id (get % 1))) (:pending-orders @app-state))]
+    (print curr-arr)
+    (if (= (count curr-arr) 0)
+      (swap! app-state assoc-in [:pending-orders] {})
+      (swap! app-state assoc-in [:pending-orders] curr-arr))))
+
+(defn add-to-pending-orders [option option-type order-type]
+  ;((:current-option @app-state) (:current-option-type @app-state) (:current-order-type @app-state))
+  (print {:order order-type :option option :type option-type})
+  ;(swap! (:pending-orders @app-state) conj {:order order-type :option option :type option-type})
+  (swap! app-state assoc-in [:pending-orders (count (:pending-orders @app-state))] {:id (rand-int 100) :order order-type :option option :type option-type}))
+
 (defn option-selector []
   (fn []
     [:div {:style {:display "flex" :justify-content "center" :padding "10px" :flex-direction "column" :flex-flow "column wrap"}}
@@ -460,7 +481,7 @@
                          }]]
         [:div {:style {:flex "2"}}
          [rui/radio-button-group {:name "option" 
-                                  :default-selected "call"
+                                  ;:default-selected "call"
                                   :on-change (fn [e index value] 
                                                  (print (str "radiobutton-click" e index value))
                                                  (swap! app-state assoc-in [:current-option-type] index))}
@@ -469,7 +490,7 @@
          ]]
          [:div {:style {:flex "2"}}
          [rui/radio-button-group {:name "order" 
-                                  :default-selected "buy"
+                                  ;:default-selected "buy"
                                   :on-change (fn [e index value] 
                                                  (print (str "radiobutton-click" e index value))
                                                  (swap! app-state assoc-in [:current-order-type] index))}
@@ -477,20 +498,22 @@
            [rui/radio-button {:value "sell" :label "Sell"}]
          ]]
 
-      [:div {:style {:flex "0.5"} :on-click #(print (:current-option @app-state))}    
+      [:div {:style {:flex "0.5"} :on-click #(add-to-pending-orders (:current-option @app-state) (:current-option-type @app-state) (:current-order-type @app-state))}    
             [ui/icon-button {:tooltip "Add to Strategy" :tooltip-position "bottom-right"}
                         (ic/content-add-circle)]]]
-(comment
+      [:h6 "Pending Orders"]
       [:ul
-        (for [bp activity-bp-list]
-          ^{:key (str "bp2 -" (:id bp))}
+        (for [xt  (:pending-orders @app-state)]
+          ^{:key (str "opt1 -" (rand-int 100))}
              [:li 
-               [:div {:style {:flex "1"} :on-click #()} 
-                        (:bullet-point bp) [:span "  "]
-                        [ui/icon-button {:tooltip "Delete selected bullet point" :tooltip-position "bottom-right"}
+               [:div {:style {:flex "1"} :on-click #(delete-pending-order xt)} 
+                        (str (:order (get xt 1)) " " (:option (get xt 1)) " " (:type (get xt 1))) 
+                        [ui/icon-button {:tooltip "Delete order" :tooltip-position "bottom-right"}
                             (ic/action-delete)]]
              ])]
-        )
+        [:div {:style {:flex "1"} :on-click #()}  
+                  [ui/raised-button {:label "Execute" :on-touch-tap #()}]]
+        
         ]))
 
 
