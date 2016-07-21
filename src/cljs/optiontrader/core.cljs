@@ -63,7 +63,7 @@
                                        :title {:text "Payoff -- ( Nifty points )"
                                                :align "high"}
                                        :labels {:overflow "justify"}}
-                               :tooltip {:valueSuffix " rupees"}
+                               :tooltip {:valueSuffix " units"}
                                :plotOptions {:bar {:dataLabels {:enabled true}}}
                                :legend {:layout "vertical"
                                         :align "right"
