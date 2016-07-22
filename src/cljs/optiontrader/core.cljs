@@ -529,6 +529,19 @@
             
         [:div {:style {:flex "1"}}[strategies-comp]]]]))
 
+(defn update-chart []
+  (swap! app-state assoc-in [:chart-config :series] [
+     {:name "My Strategy"
+     :data (mat/add (reduce mat/add (into [] (map xyz (:saved-orders @app-state)))) (reduce mat/add (into [] (map xyz (:pending-orders @app-state)))))}]
+  )
+  )
+
+(defn delete-all-orders []
+  (print "DELETING All")
+      (swap! app-state assoc-in [:pending-orders] {})
+      (swap! app-state assoc-in [:saved-orders] {})
+  (update-chart))
+
 (defn delete-pending-order [order]
   (print "DELETING " (:order (get order 1)) (:id (get order 1)))
   ;(print (map #(print (:id (get % 1))) (:pending-orders @app-state)))
@@ -536,15 +549,13 @@
     (print curr-arr)
     (if (= (count curr-arr) 0)
       (swap! app-state assoc-in [:pending-orders] {})
-      (swap! app-state assoc-in [:pending-orders] curr-arr))))
+      (swap! app-state assoc-in [:pending-orders] curr-arr))
+    (update-chart)))
 
 (defn add-to-pending-orders [option option-type order-type]
   (swap! app-state assoc-in [:pending-orders (count (:pending-orders @app-state))] {:id (rand-int 100) :order order-type :option option :type option-type})
 
-  (swap! app-state assoc-in [:chart-config :series] [
-     {:name "My Strategy"
-     :data (mat/add (reduce mat/add (into [] (map xyz (:saved-orders @app-state)))) (reduce mat/add (into [] (map xyz (:pending-orders @app-state)))))}]
-  ))
+  (update-chart))
 
 
 (defn get-selected-order [xt]
@@ -595,10 +606,12 @@
                         [ui/icon-button {:tooltip "Delete order" :tooltip-position "bottom-right"}
                             (ic/action-delete)]]
              ])]
+      [:div {:style {:flex "1"}}
+        [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
         [:div {:style {:flex "1"} :on-click #()}  
                   [ui/raised-button {:label "Execute" :on-touch-tap #()}]]
-        
-        ]]))
+        [:div {:style {:flex "1"} :on-click #(delete-all-orders)}  
+                  [ui/raised-button {:label "Clear All" :on-touch-tap #()}]]]]]]))
 
 
 (defn option-selector-old []
