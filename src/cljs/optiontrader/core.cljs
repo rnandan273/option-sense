@@ -374,17 +374,18 @@
    {:class (when (= page (session/get :page)) "active")}
    [:a.nav-link
     {:href uri
+    :style {:color "#FFFFFF"}
      :on-click #(reset! collapsed? true)} title]])
 
 (defn navbar []
   (let [collapsed? (reagent/atom true)]
     (fn []
-      [:nav.navbar.navbar-light
+      [:nav.navbar.navbar-light  {:style {:color "#FFFFFF"}}
        [:button.navbar-toggler.hidden-sm-up
         {:on-click #(swap! collapsed? not)} "☰"]
        [:div.collapse.navbar-toggleable-xs
         (when-not @collapsed? {:class "in"})
-        [:a.navbar-brand {:href "#/"} "OptionSense"]
+        [:a.navbar-brand {:href "#/"  :style {:color "#FFFFFF"}} "OptionSense"]
         [:ul.nav.navbar-nav
          [nav-link "#/" "Home" :home collapsed?]
          [nav-link "#/mystrategies" "My Strategies" :mystrategies collapsed?]
@@ -398,7 +399,7 @@
       {:mui-theme (ui/get-mui-theme "darkBaseTheme")}
         [rui/toolbar
          [rui/toolbar-group 
-            [rui/toolbar-title {:text "OptionsLab"}]
+            [rui/toolbar-title {:text "OptionSense"}]
          ]
          [rui/toolbar-group 
             [ui/raised-button {:label "Home" :on-touch-tap #()}]

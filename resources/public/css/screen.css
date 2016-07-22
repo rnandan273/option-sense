@@ -5,16 +5,20 @@ body {
 }
 .navbar {
   margin-bottom: 10px;
+  background-color: #3b5998
 }
 .navbar-brand {
   float: none;
 }
 .navbar-nav .nav-item {
   float: none;
+  color: #FFFFFF
+  
 }
 .navbar-divider,
 .navbar-nav .nav-item+.nav-item,
 .navbar-nav .nav-link + .nav-link {
+  color: #FFFFFF
   margin-left: 0;
 }
 @media (min-width: 34em) {
