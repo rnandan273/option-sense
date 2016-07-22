@@ -3,6 +3,9 @@
             [reagent.session :as session]
             [secretary.core :as secretary :include-macros true]
             [goog.events :as events]
+            [optiontrader.handlers]
+            [optiontrader.subs]
+            [datascript.core :as d]
             [clojure.core.matrix :as mat]
             [cljs.core.match :refer-macros [match]]
             [goog.history.EventType :as HistoryEventType]
@@ -11,15 +14,64 @@
             [ajax.core :refer [GET POST]]
             [cljs.reader :as reader]
             [cljsjs.highcharts :as highcharts]
+            [re-frame.core :as re-frame]
+            [posh.reagent :refer [pull q posh!]]
             [cljsjs.material-ui]
             [cljs-react-material-ui.core :as ui]
             [cljs-react-material-ui.reagent :as rui]
             [cljs-react-material-ui.icons :as ic])
   (:import goog.History))
 
+;;posh related
+(comment
+(def app-schema 
+          {:company/logo {:db/type :db.type/string}
+           :strategy/name {:db/type :db.type/string}
+           :strategy/id {:db/unique :db.unique/identity}
+           :strategy/description {:db/type :db.type/string}
+
+           :option/strategy {:db/type :db.type/ref}
+           :option/id {:db/unique :db.unique/identity}
+           :option/optiontype {:db/type :db.type/string}
+           :option/ordertype {:db/type :db.type/string}
+           :option/premium {:db/type :db.type/double}
+
+           :executed-order/strategy {:db/type :db.type/ref}
+           :executed-order/id {:db/unique :db.unique/identity} })
+
+(def conn (d/create-conn app-schema))
+(posh! conn)
+(def tempid (let [n (atom 0)] (fn [] (swap! n dec))))
+
+(def counter (atom 0))
+(defn next-idx []
+  (swap! counter inc))
+
+(defn new-entity! [conn varmap]
+  ((:tempids (d/transact! conn [(merge varmap {:db/id -1})])) -1))
+
+
+(defn add-strategies []
+  (d/transact! conn [
+    {:strategy/name {:db/type :db.type/string}
+     :strategy/id (next-idx)
+     :strategy/description {:db/type :db.type/string}
+
+     :option/strategy {:db/type :db.type/ref}
+     :option/id (next-idx) 
+     :option/optiontype {:db/type :db.type/string}
+     :option/ordertype {:db/type :db.type/string}
+     :option/premium {:db/type :db.type/double}}
+    ])
+  )
+)
+;;
+
 (def app-state (reagent/atom {:base-strike-price 7900
                         :strike-price 8200 
                         :current-option 8100
+                        :hedge-drawer false
+                        :strategy-drawer false
                         :selected-strategy "buy-butterfly"
                         :span 100
                         :pending-orders {}
@@ -233,13 +285,14 @@
 
 (defn xyz [xt]
   (let [order (:order (get xt 1))
-      option (:option (get xt 1)) 
+      option (:option (get xt 1))
+      qty (:qty (get xt 1)) 
       type (:type (get xt 1))]
   (match [type order]
-    ["call" "buy"] (buy-call option (get-premium option))
-    ["call" "sell"] (sell-call option (get-premium option))
-    ["put" "buy"] (buy-put option (get-premium option))
-    ["put" "sell"] (sell-put option (get-premium option))
+    ["call" "buy"] (mat/mul qty (buy-call option (get-premium option)))
+    ["call" "sell"] (mat/mul qty  (sell-call option (get-premium option)))
+    ["put" "buy"] (mat/mul qty (buy-put option (get-premium option)))
+    ["put" "sell"] (mat/mul qty  (sell-put option (get-premium option)))
     :else nil)))
 
 
@@ -257,11 +310,12 @@
             (print "Pending - " (get xt 1))
               (recur (rest lx)))))
 
-   (print (map xyz (:pending-orders @app-state)))
    (print (map xyz (:saved-orders @app-state)))
 
-   (print (reduce mat/add 
-    (into [] (map xyz (:saved-orders @app-state)))))
+   (print "Saved Orders " (reduce mat/add (into [] (map xyz (:saved-orders @app-state)))))
+
+   (print (map xyz (:pending-orders @app-state)))
+   (print "Pending Orders " (reduce mat/add (into [] (map xyz (:pending-orders @app-state)))))
    ;(reduce mat/add (into [] (map xyz (:pending-orders @app-state))))))
    ;(print (reduce mat/add (into [] (map xyz (:pending-orders @app-state)))))
 
@@ -307,8 +361,12 @@
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #(execute-strategy strategy-type)}  
                   [ui/raised-button {:label "Execute" :on-touch-tap #()}]]
-              [:div {:style {:flex "1"} :on-click #(save-strategy strategy-type)}  
-                  [ui/raised-button {:label "Save" :on-touch-tap #()}]]]])))
+              [:div {:style {:flex "1"}}
+              ;:on-click #(save-strategy strategy-type)}  
+                  [ui/raised-button {:label "Save" :on-touch-tap #(save-strategy strategy-type)}]]
+              [:div {:style {:flex "1"}}  
+                  [ui/raised-button {:label "Close" 
+                                     :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] false)}]]]])))
 
 
 (defn nav-link [uri title page collapsed?]
@@ -396,7 +454,8 @@
     {:name "Short ATM Broken Wing Butterfly"
      :data (mat/add (sell-call sp1 pr1) (mat/mul 3 (buy-call sp3 pr3)) (mat/mul 2 (sell-call sp4 pr4)))}
      {:name "My Strategy"
-     :data (mat/add (reduce mat/add (into [] (map xyz (:saved-orders @app-state)))) (reduce mat/add (into [] (map xyz (:pending-orders @app-state)))))}
+     ;:data (mat/add (reduce mat/add (into [] (map xyz (:saved-orders @app-state)))) (reduce mat/add (into [] (map xyz (:pending-orders @app-state)))))}
+     :data (mat/add (reduce mat/add (map xyz (:saved-orders @app-state))) (reduce mat/add (map xyz (:pending-orders @app-state))))}
     ;{:name "Trading range histogram - 24 months" :data [25 7 90 10 120 200 110 90 68 26]}
  
     ])
@@ -445,13 +504,22 @@
          [rui/menu-item {:value "long-atm-condor"} "Long ATM Condor Spread"]
          [rui/menu-item {:value "long-atm-call-spread"} "Long ATM Call Spread"]]]))
 
+(defn strategy-drawer []
+  (fn []
+    [rui/drawer {:width 400 :open (:strategy-drawer @app-state) :open-secondary true}
+        [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
+          [:div {:style {:flex "1"}}  [strategy-dropdown] ]
+          [:div {:style {:flex "1"}}  [:br]] 
+          [:div {:style {:flex "1"}} [(get-selected-strategy)]]
+        ]]))
+
 (defn strategies-comp []
   (fn []
     [:div 
   [:div {:style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
     [:label "Explore Option strategies at selected ATM Nifty Strike Price"]]
     [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
-      [:div {:style {:flex "2"}}
+      [:div {:style {:flex 5}}
           ;[rui/paper  {:zDepth 4} 
           [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
           [:div {:style {:flex "1" :padding "10px"}} 
@@ -475,12 +543,10 @@
           [:div {:style {:flex "1"}} [highchart-component]]]
           ;]
          ]
-      [:div {:style {:flex "1"}} 
-        [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-          [:div {:style {:flex "1"}}  [strategy-dropdown] ]
-          [:div {:style {:flex "1"}}  [:br]] 
-          [:div {:style {:flex "1"}} [(get-selected-strategy)]]
-        ]]]]))
+      [:div {:style {:flex "0.5"}} 
+                  [ui/raised-button {:label "Explore" 
+                                     :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] true)}]]
+      [:div {:style {:flex "1"}} [strategy-drawer]]]]))
 
 (comment
 (defn strategies-comp-old []
@@ -522,19 +588,19 @@
 )
 
 (defn home-page []
+  (let [name  (re-frame/subscribe [:name])] 
   (fn []
     [rui/mui-theme-provider
       {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue700)}})}
-        [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
-            
-        [:div {:style {:flex "1"}}[strategies-comp]]]]))
+        [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}  
+        [:div {:style {:flex "1"}}[strategies-comp]]]])))
 
 (defn update-chart []
   (swap! app-state assoc-in [:chart-config :series] [
-     {:name "My Strategy"
-     :data (mat/add (reduce mat/add (into [] (map xyz (:saved-orders @app-state)))) (reduce mat/add (into [] (map xyz (:pending-orders @app-state)))))}]
+    {:name "My Strategy"
+     :data (mat/add (reduce mat/add (map xyz (:saved-orders @app-state))) (reduce mat/add (map xyz (:pending-orders @app-state))))}]
   )
-  )
+)
 
 (defn delete-all-orders []
   (print "DELETING All")
@@ -552,8 +618,8 @@
       (swap! app-state assoc-in [:pending-orders] curr-arr))
     (update-chart)))
 
-(defn add-to-pending-orders [option option-type order-type]
-  (swap! app-state assoc-in [:pending-orders (count (:pending-orders @app-state))] {:id (rand-int 100) :order order-type :option option :type option-type})
+(defn add-to-pending-orders [option option-type qty order-type]
+  (swap! app-state assoc-in [:pending-orders (count (:pending-orders @app-state))] {:id (rand-int 100) :order order-type :option option :qty qty :type option-type})
 
   (update-chart))
 
@@ -571,6 +637,8 @@
         "long-otm+2-call" {:option sp4 :type "call" :order "buy"}
   )))
 
+
+
 (defn hedge-dropdown []
   (fn []
     [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
@@ -580,7 +648,7 @@
                                          (print "Index " index)
                                          (print "Value " value)
                                          (let [xt  (get-selected-order value)]
-                                         (add-to-pending-orders (:option xt) (:type xt) (:order xt))))}
+                                         (add-to-pending-orders (:option xt) (:type xt) 1 (:order xt))))}
 
          [rui/menu-item {:value "" :primary-text "Select Strategy to hedge"}]
          [rui/menu-item {:value "long-atm-call" :primary-text "Long ATM call"}]
@@ -590,10 +658,12 @@
 
      ]]))
 
+
 (defn option-selector []
   (fn []
     [:div {:style {:display "flex" :justify-content "center" :padding "10px" :flex-direction "column" :flex-flow "column wrap"}}
       [:div {:style {:flex "1"}} [hedge-dropdown]]
+      
       [:div {:style {:flex "2"}}[:br]]
       [:div {:style {:flex "1"}}[:h6 "Pending Orders"]]
       [:div {:style {:flex "1"}} 
@@ -610,8 +680,20 @@
         [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
         [:div {:style {:flex "1"} :on-click #()}  
                   [ui/raised-button {:label "Execute" :on-touch-tap #()}]]
-        [:div {:style {:flex "1"} :on-click #(delete-all-orders)}  
-                  [ui/raised-button {:label "Clear All" :on-touch-tap #()}]]]]]]))
+        [:div {:style {:flex "1"}}  
+                  [ui/raised-button {:label "Clear All" 
+                                     :on-touch-tap #(delete-all-orders)}]]
+        [:div {:style {:flex "1"}}  
+                  [ui/raised-button {:label "Close" 
+                                     :on-touch-tap #(swap! app-state assoc-in [:hedge-drawer] false)}]]
+                  ]]]]))
+
+
+
+(defn hedge-drawer []
+  (fn []
+    [rui/drawer {:width 400 :open (:hedge-drawer @app-state) :open-secondary true}
+        [option-selector]]))
 
 
 (defn option-selector-old []
@@ -648,7 +730,7 @@
            [rui/radio-button {:value "sell" :label "Sell"}]
          ]]
 
-      [:div {:style {:flex "0.5"} :on-click #(add-to-pending-orders (:current-option @app-state) (:current-option-type @app-state) (:current-order-type @app-state))}    
+      [:div {:style {:flex "0.5"} :on-click #(add-to-pending-orders (:current-option @app-state) (:current-option-type @app-state) 1 (:current-order-type @app-state))}    
             [ui/icon-button {:tooltip "Add to Strategy" :tooltip-position "bottom-right"}
                         (ic/content-add-circle)]]]
 
@@ -678,13 +760,16 @@
               [:div {:style {:flex "1"}}[:h6 "Saved and executed strategies\n"]]
               [:div {:style {:flex "1"}} [:h6 "Do a \"What If Hedge analysis \" to your positions before you execute a trade"]
 ]
-              [:div {:style {:flex "1"}} [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
-                [:div {:style {:flex "2"}}
-                    ;[rui/paper  {:zDepth 4} 
-                    [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
-                    [:div {:style {:flex "1"}} [highchart-component]]]]
-                    [:div {:style {:flex "1"}}
-                      [option-selector]]]]]]))
+              [:div {:style {:flex "1"}} 
+                [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
+                  [:div {:style {:flex "6"}}
+                      ;[rui/paper  {:zDepth 4} 
+                      ;[:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
+                        [highchart-component]]
+                  [:div {:style {:flex "0.25"}} 
+                    [ui/raised-button {:label "Hedge" 
+                                       :on-touch-tap #(swap! app-state assoc-in [:hedge-drawer] true)}]]
+                  [:div {:style {:flex "1"}} [hedge-drawer]]]]]]))
 
 (def pages
   {:home #'home-page
@@ -732,6 +817,7 @@
   (reagent/render [#'page] (.getElementById js/document "app")))
 
 (defn init! []
+  (re-frame/dispatch-sync [:initialize-db])
   (load-interceptors!)
   (fetch-docs!)
   (hook-browser-navigation!)
