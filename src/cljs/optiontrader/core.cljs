@@ -46,13 +46,13 @@
                                         :borderWidth 1
                                         :shadow true}
                                :credits {:enabled false}
-                               :series [{:name "Buy Butterfly"
+                               :series [{:name "Long ATM Butterfly"
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
-                                        {:name "Sell Butterfly"
+                                        {:name "Short ATM Butterfly"
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
-                                        {:name "Buy Broken wing Butterfly"
+                                        {:name "Long ATM Broken wing Butterfly"
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
-                                        {:name "Sell Broken wing Butterfly"
+                                        {:name "Short ATM Broken wing Butterfly"
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
                                         ]}
                         :my-chart-config
@@ -77,18 +77,18 @@
                                         :borderWidth 1
                                         :shadow true}
                                :credits {:enabled false}
-                               :series [{:name "Buy Butterfly"
+                               :series [{:name "Long ATM Butterfly"
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
-                                        {:name "Sell Butterfly"
+                                        {:name "Short ATM Butterfly"
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
-                                        {:name "Buy Broken wing Butterfly"
+                                        {:name "Long ATM Broken wing Butterfly"
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
-                                        {:name "Sell Broken wing Butterfly"
+                                        {:name "Short ATM Broken wing Butterfly"
                                          :data [-10 -10 -10 90 -10 -10 -10 -10 -10 -10]}
                                         ]}}))
 
-(def strategy-guide {:buy-butterfly {
-                          :header "Buy Butterfly" 
+(def strategy-guide {:long-atm-butterfly {
+                          :header "Long ATM Butterfly" 
                           :detail (str "The butterfly spread is a neutral strategy that is a combination of a 
                                         bull spread and a bear spread. It is a limited profit, limited risk 
                                         options strategy. There are 3 striking prices involved in a butterfly 
@@ -97,15 +97,15 @@
                                    {:sp 1 :type "call" :order "sell" :qty 2 :pr 1}
                                    {:sp 2 :type "call" :order "buy" :qty 1 :pr 2}]}
 
-                     :sell-butterfly {
-                          :header "Sell Butterfly"
+                     :short-atm-butterfly {
+                          :header "Short ATM Butterfly"
                           :detail "This is the converse of buying a butterfly spread"
                           :orders [{:sp 0 :type "call" :order "sell"  :qty 1 :pr 0}
                                    {:sp 1 :type "call" :order "buy" :qty 2 :pr 1}
                                    {:sp 2 :type "call" :order "sell" :qty 1 :pr 2}]}
 
-                     :buy-broken-wing-butterfly {
-                          :header "Buy Broken Wing Butterfly"
+                     :long-atm-bwb {
+                          :header "Long ATM Broken Wing Butterfly"
                           :detail (str "In this strategy a short call spread is embedded inside a long call 
                             butterfly spread. A Broken Wing Butterfly is a long butterfly spread with 
                             long strikes that are not equidistant from the short strike. This leads to one 
@@ -115,27 +115,27 @@
                                    {:sp 2 :type "call" :order "sell" :qty 3 :pr 2}
                                    {:sp 3 :type "call" :order "buy" :qty 2 :pr 3}]}
 
-                     :sell-broken-wing-butterfly {
-                          :header "Sell Broken Wing butterfly"
+                     :short-atm-bwb {
+                          :header "Short ATM Broken Wing butterfly"
                           :detail "This is the converse of Buying a Broken wing butterfly"
                           :orders [{:sp 0 :type "call" :order "sell" :qty 1 :pr 0}
                                    {:sp 2 :type "call" :order "buy" :qty 3 :pr 2}
                                    {:sp 3 :type "call" :order "sell" :qty 2 :pr 3}]}
-                     :long-call-spread {
-                          :header "Long Call Spread"
+                     :long-atm-call-spread {
+                          :header "Long ATM Call Spread"
                           :detail (str "A long call spread gives you the right to buy stock at strike price 1 and obligates you to sell the stock at strike price 2 if assigned")
                           :orders [{:sp 0 :type "Call" :order "Buy" :qty 1 :pr 0}
                                    {:sp 1 :type "Call" :order "Sell" :qty 1 :pr 1}]}
-                     :long-condor-spread {
-                          :header "Long Condor Spread"
+                     :long-atm-condor {
+                          :header "Long ATM Condor Spread"
                           :detail (str "You can think of a long condor spread with calls as simultaneously running an in-the-money long call spread and an out-of-the-money short call spread. Ideally, you want the short call spread to expire worthless, while the long call spread achieves its maximum value with strikes 1 and 2 in-the-money")
                           :orders [{:sp 0 :type "call" :order "buy" :qty 1 :pr 0}
                                    {:sp 1 :type "call" :order "sell" :qty 1 :pr 1}
                                    {:sp 2 :type "call" :order "sell" :qty 1 :pr 2}
                                    {:sp 3 :type "call" :order "buy" :qty 1 :pr 3}
                                    ]}
-                     :buy-call-ladder {
-                          :header "Buy Call Ladder"
+                     :long-atm-call-ladder {
+                          :header "Long ATM Call Ladder"
                           :detail (str "The call backspread (reverse call ratio spread) is a bullish 
                             strategy in options trading that involves selling a number of call options 
                             and buying more call options of the same underlying stock and expiration 
@@ -196,35 +196,31 @@
 
 (defn strategy-details [strategy-type]
   (fn []
-
-  (let [sp1 (:strike-price @app-state)
-        span (:span @app-state)
-        sp2 (+ sp1 span)
-        sp3 (+ sp1 (* 2 span))
-        sp4 (+ sp1 (* 3 span))
-        sp-vector [sp1 sp2 sp3 sp4]
-        pr1 (get-premium sp1)
-        pr2 (get-premium sp2)
-        pr3 (get-premium sp3)
-        pr4 (get-premium sp4)
-        pr-vector [pr1 pr2 pr3 pr4]
-        order-vector  (:orders ((keyword strategy-type) strategy-guide))]
-  
-  ;[rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :padding-left "10px" :flex-direction "row" :flex-flow "row wrap"}}
-      [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
-      [:div {:style {:flex "1"}}
-        [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}   
-           (for [xt order-vector]
-            ^{:key (str "v-" (:sp xt))}
-            [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
-              [:div {:style {:flex "1"}} (get sp-vector (:sp xt))]
-              [:div {:style {:flex "1"}} (:type xt)]
-              [:div {:style {:flex "1"}} (:order xt)]
-              [:div {:style {:flex "1"}} (:qty xt) " lots"]
-              [:div {:style {:flex "1"}} (get pr-vector (:pr xt))]]
-
-
-            )]]])))
+    (let [sp1 (:strike-price @app-state)
+            span (:span @app-state)
+            sp2 (+ sp1 span)
+            sp3 (+ sp1 (* 2 span))
+            sp4 (+ sp1 (* 3 span))
+            sp-vector [sp1 sp2 sp3 sp4]
+            pr1 (get-premium sp1)
+            pr2 (get-premium sp2)
+            pr3 (get-premium sp3)
+            pr4 (get-premium sp4)
+            pr-vector [pr1 pr2 pr3 pr4]
+            order-vector  (:orders ((keyword strategy-type) strategy-guide))]
+      
+      ;[rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :padding-left "10px" :flex-direction "row" :flex-flow "row wrap"}}
+          [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}} 
+          [:div {:style {:flex "1"}}
+            [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}   
+               (for [xt order-vector]
+                ^{:key (str "v-" (:sp xt))}
+                [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
+                  [:div {:style {:flex "1"}} (get sp-vector (:sp xt))]
+                  [:div {:style {:flex "1"}} (:type xt)]
+                  [:div {:style {:flex "1"}} (:order xt)]
+                  [:div {:style {:flex "1"}} (:qty xt) " lots"]
+                  [:div {:style {:flex "1"}} (get pr-vector (:pr xt))]])]]])))
 
 (defn execute-orders []
    (print "Executing " (:saved-orders @app-state))
@@ -304,7 +300,7 @@
         pr1 (get-premium sp1)
         pr2 (get-premium sp2)
         pr3 (get-premium sp3)]
-  [rui/card 
+  [rui/card {:style {:padding "10px"}}
           [rui/card-header (:header ((keyword strategy-type) strategy-guide))]
           [rui/card-text (:detail ((keyword strategy-type) strategy-guide))]
           [(strategy-details strategy-type)]
@@ -337,23 +333,40 @@
          [nav-link "#/recommendations" "Recommendations" :recommendations collapsed?]
          [nav-link "#/about" "About" :about collapsed?]]]])))
 
+(defn navbar-new []
+  (fn []
+    [rui/mui-theme-provider
+      ;{:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue500)}})}
+      {:mui-theme (ui/get-mui-theme "darkBaseTheme")}
+        [rui/toolbar
+         [rui/toolbar-group 
+            [rui/toolbar-title {:text "OptionsLab"}]
+         ]
+         [rui/toolbar-group 
+            [ui/raised-button {:label "Home" :on-touch-tap #()}]
+            [ui/raised-button {:label "My Strategies" :on-touch-tap #()}]
+            [ui/raised-button {:label "Recommendations" :on-touch-tap #()}]
+         ]
+        ]
+        ]))
+
 (defn about-page []
-  [:div.container
-   [:div.row
-    [:div.col-md-12
-     "Developed by Xpertview analytics. This app is the culmination of personal experience in trading options in the Indian Stock Market."]]
-  [:div.row
-    [:div.col-md-12
-      "Various strategies suggested have been based on literature survey. More to come ..... in the exciting world of Option Trading!!!" ]]])
+  (fn []
+    [rui/mui-theme-provider
+      {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue700)}})}
+        [rui/paper  {:zDepth 1 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
+           [:h6 "Developed by Xpertview analytics. This app is the culmination of personal experience in trading options in the Indian Stock Market."
+]
+           [:h6 "Various strategies suggested have been based on literature survey. More to come ..... in the exciting world of Option Trading!!!"]
+]]))
 
 (defn recommendations-page []
-  [:div.container
-   [:div.row
-    [:div.col-md-12
-     (str "Recommended strategies based on your trading history and prevailing market conditions") ]]])
-
-
-
+  (fn []
+    [rui/mui-theme-provider
+      {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue700)}})}
+        [rui/paper  {:zDepth 1 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
+           [:h6 "Recommended strategies based on your trading history and prevailing market conditions"]
+           ]]))
 
 (defn update-strike-price [strike-price]
   (let [strike-price (reader/read-string strike-price)
@@ -368,19 +381,19 @@
         pr4 (get-premium sp4)]
 
   (swap! app-state assoc-in [:chart-config :series] [
-    {:name "Buy Butterfly" 
+    {:name "Long ATM Butterfly" 
      :data (mat/add (buy-call sp1 pr1) (mat/mul 2 (sell-call sp2 pr2)) (buy-call sp3 pr3))}
-    {:name "Buy Call Ladder" 
+    {:name "Long ATM Call Ladder" 
      :data (mat/add (sell-call sp1 pr1) (mat/mul 2 (buy-call sp2 pr2)))}
-    {:name "Sell Butterfly" 
+    {:name "Short ATM Butterfly" 
      :data (mat/add (sell-call sp1 pr1) (mat/mul 2 (buy-call sp2 pr2)) (sell-call sp3 pr3))}
-    {:name "Buy Broken Wing Butterfly" 
+    {:name "Long ATM Broken Wing Butterfly" 
      :data (mat/add (buy-call sp1 pr1) (mat/mul 3 (sell-call sp3 pr3)) (mat/mul 2 (buy-call sp4 pr4)))}
-    {:name "Buy Long Call Spread " 
+    {:name "Long ATM Long Call Spread " 
      :data (mat/add (buy-call sp1 pr1) (sell-call sp2 pr2))}
-    {:name "Buy Long Condor Spread " 
+    {:name "Long ATM Long Condor Spread " 
      :data (mat/add (buy-call sp1 pr1) (sell-call sp2 pr2) (sell-call sp3 pr3) (buy-call sp4 pr4))}
-    {:name "Sell Broken Wing Butterfly"
+    {:name "Short ATM Broken Wing Butterfly"
      :data (mat/add (sell-call sp1 pr1) (mat/mul 3 (buy-call sp3 pr3)) (mat/mul 2 (sell-call sp4 pr4)))}
      {:name "My Strategy"
      :data (mat/add (reduce mat/add (into [] (map xyz (:saved-orders @app-state)))) (reduce mat/add (into [] (map xyz (:pending-orders @app-state)))))}
@@ -423,43 +436,45 @@
                             :on-change (fn [e index value] 
                                          (print (str "dropdown-click" e index value))
                                          (swap! app-state assoc-in [:selected-strategy] value))}
-         [rui/menu-item {:value "" :primary-text"Select Strategy to execute"}]
-         [rui/menu-item {:value "buy-butterfly" :primary-text "Buy Butterfly"}]
-         [rui/menu-item {:value "sell-butterfly"} "Sell butterfly"]
-         [rui/menu-item {:value "buy-call-ladder"} "Buy Call ladder"]
-         [rui/menu-item {:value "buy-broken-wing-butterfly"} "Buy Broken Wing butterfly"]
-         [rui/menu-item {:value "sell-broken-wing-butterfly"} "Sell Broken Wing butterfly"]
-         [rui/menu-item {:value "long-condor-spread"} "Long Condor Spread"]
-         [rui/menu-item {:value "long-call-spread"} "Long Call Spread"]]]))
+         [rui/menu-item {:value "" :primary-text "Select Strategy to execute"}]
+         [rui/menu-item {:value "long-atm-butterfly" :primary-text "Long ATM Butterfly"}]
+         [rui/menu-item {:value "short-atm-butterfly"} "Short ATM butterfly"]
+         [rui/menu-item {:value "long-atm-call-ladder"} "Long ATM Call ladder"]
+         [rui/menu-item {:value "long-atm-bwb"} "Long ATM Broken Wing butterfly"]
+         [rui/menu-item {:value "short-atm-bwb"} "Short ATM Broken Wing butterfly"]
+         [rui/menu-item {:value "long-atm-condor"} "Long ATM Condor Spread"]
+         [rui/menu-item {:value "long-atm-call-spread"} "Long ATM Call Spread"]]]))
 
 (defn strategies-comp []
   (fn []
     [:div 
-  [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
-    [:h5 "Explore Option strategies at selected Nifty Strike Price"]]
+  [:div {:style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
+    [:label "Explore Option strategies at selected ATM Nifty Strike Price"]]
     [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
       [:div {:style {:flex "2"}}
-          [rui/paper  {:zDepth 4} 
+          ;[rui/paper  {:zDepth 4} 
           [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
           [:div {:style {:flex "1" :padding "10px"}} 
            ;[rui/paper  {:zDepth 4}
                   [rui/text-field
-                          {:floatingLabelText "Enter Nifty strike price eg: 8200"
-                            :full-width false
+                          {:floatingLabelText "Enter ATM Nifty strike price eg: 8200"
+                            :full-width true
                             :value (:strike-price @app-state)
                             :on-change #(update-strike-price (.. % -target -value))
                             }]
           ;[:div {:style {:flex "1" :padding "10px"}} 
             [rui/slider {:default-value 0.2
                          :step 0.1
-                         :description "Or Use the Slider to select Nifty Strike price"
+                         :description "Or Use the Slider to select ATM Nifty Strike price"
                          :on-change (fn [e index value] 
                                          (print (str "slider-click" e index (type value)))
                                          (update-strike-price (str (+ (:base-strike-price @app-state)(* 1000 index))))
                                          )
                          }]
           ]
-          [:div {:style {:flex "1"}} [highchart-component]]]]]
+          [:div {:style {:flex "1"}} [highchart-component]]]
+          ;]
+         ]
       [:div {:style {:flex "1"}} 
         [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
           [:div {:style {:flex "1"}}  [strategy-dropdown] ]
@@ -494,10 +509,6 @@
     [rui/tabs 
         [rui/tab {:label "Strategy Explorer"}
           [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
-                 ;[:div {:style {:flex "1"}} [(buy-1-3-2-butterfly)]]
-                 ;[:div {:style {:flex "1"}} [(sell-1-3-2-butterfly)]]
-                 ;[:div {:style {:flex "1"}} [(sell-butterfly)]]
-                 ;[:div {:style {:flex "1"}} [(buy-butterfly)]]
                  [:div {:style {:flex "1"}} [(buy-butterfly-card)]]
                  [:div {:style {:flex "1"}} [(sell-butterfly-card)]]
                  [:div {:style {:flex "1"}} [(buy-1-3-2-butterfly-card)]]
@@ -513,8 +524,10 @@
 (defn home-page []
   (fn []
     [rui/mui-theme-provider
-      {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue500)}})}
-        [strategies-comp]]))
+      {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue700)}})}
+        [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
+            
+        [:div {:style {:flex "1"}}[strategies-comp]]]]))
 
 (defn delete-pending-order [order]
   (print "DELETING " (:order (get order 1)) (:id (get order 1)))
@@ -526,9 +539,6 @@
       (swap! app-state assoc-in [:pending-orders] curr-arr))))
 
 (defn add-to-pending-orders [option option-type order-type]
-  ;((:current-option @app-state) (:current-option-type @app-state) (:current-order-type @app-state))
-  ;(print {:order order-type :option option :type option-type})
-  ;(swap! (:pending-orders @app-state) conj {:order order-type :option option :type option-type})
   (swap! app-state assoc-in [:pending-orders (count (:pending-orders @app-state))] {:id (rand-int 100) :order order-type :option option :type option-type})
 
   (swap! app-state assoc-in [:chart-config :series] [
@@ -536,7 +546,62 @@
      :data (mat/add (reduce mat/add (into [] (map xyz (:saved-orders @app-state)))) (reduce mat/add (into [] (map xyz (:pending-orders @app-state)))))}]
   ))
 
+
+(defn get-selected-order [xt]
+  (let [sp1 (:strike-price @app-state)
+        span (:span @app-state)
+        sp2 (+ sp1 span)
+        sp3 (+ sp1 (* 2 span))
+        sp4 (+ sp1 (* 3 span))]
+  (case xt
+        "long-atm-call" {:option sp1 :type "call" :order "buy"}
+        "long-otm-call" {:option sp2 :type "call" :order "buy"}
+        "long-otm+1-call" {:option sp3 :type "call" :order "buy"}
+        "long-otm+2-call" {:option sp4 :type "call" :order "buy"}
+  )))
+
+(defn hedge-dropdown []
+  (fn []
+    [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
+        [rui/drop-down-menu {:value "" 
+                            :on-change (fn [e index value] 
+                                         (print (str "hedge dropdown-click" e index value))
+                                         (print "Index " index)
+                                         (print "Value " value)
+                                         (let [xt  (get-selected-order value)]
+                                         (add-to-pending-orders (:option xt) (:type xt) (:order xt))))}
+
+         [rui/menu-item {:value "" :primary-text "Select Strategy to hedge"}]
+         [rui/menu-item {:value "long-atm-call" :primary-text "Long ATM call"}]
+         [rui/menu-item {:value "long-otm-call" :primary-text "Long OTM call"}]
+         [rui/menu-item {:value "long-otm+1-call" :primary-text "Long OTM+1 call"}]
+         [rui/menu-item {:value "long-otm+2-call" :primary-text "Long OTM+2 call"}]
+
+     ]]))
+
 (defn option-selector []
+  (fn []
+    [:div {:style {:display "flex" :justify-content "center" :padding "10px" :flex-direction "column" :flex-flow "column wrap"}}
+      [:div {:style {:flex "1"}} [hedge-dropdown]]
+      [:div {:style {:flex "2"}}[:br]]
+      [:div {:style {:flex "1"}}[:h6 "Pending Orders"]]
+      [:div {:style {:flex "1"}} 
+        [:ul
+        (for [xt  (:pending-orders @app-state)]
+          ^{:key (str "opt1 -" (rand-int 100))}
+             [:li 
+               [:div {:style {:flex "1"} :on-click #(delete-pending-order xt)} 
+                        (str (:order (get xt 1)) " " (:option (get xt 1)) " " (:type (get xt 1))) 
+                        [ui/icon-button {:tooltip "Delete order" :tooltip-position "bottom-right"}
+                            (ic/action-delete)]]
+             ])]
+        [:div {:style {:flex "1"} :on-click #()}  
+                  [ui/raised-button {:label "Execute" :on-touch-tap #()}]]
+        
+        ]]))
+
+
+(defn option-selector-old []
   (fn []
     [:div {:style {:display "flex" :justify-content "center" :padding "10px" :flex-direction "column" :flex-flow "column wrap"}}
       [:h5 "Use the slider to select the hedge"]
@@ -594,18 +659,18 @@
 (defn mystrategies-page []
    (fn []
       [rui/mui-theme-provider
-          {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue500)}})}
-            [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
-              [:h5 "View all your saved and executed strategies\n"]
-              [:h5 "You can do a \"What If Hedge analysis \" to your positions and execute a trade"]
-
-              [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
+          {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue700)}})}
+          ;{:mui-theme (ui/get-mui-theme "lightBaseTheme")}
+            [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "20px" :flex-flow "column wrap"}}
+              [:div {:style {:flex "1"}}[:h6 "Saved and executed strategies\n"]]
+              [:div {:style {:flex "1"}} [:h6 "Do a \"What If Hedge analysis \" to your positions before you execute a trade"]
+]
+              [:div {:style {:flex "1"}} [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
                 [:div {:style {:flex "2"}}
                     ;[rui/paper  {:zDepth 4} 
                     [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
                     [:div {:style {:flex "1"}} [highchart-component]]]]
                     [:div {:style {:flex "1"}}
-                    [rui/paper  {:zDepth 4}
                       [option-selector]]]]]]))
 
 (def pages
