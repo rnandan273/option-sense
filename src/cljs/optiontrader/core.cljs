@@ -92,7 +92,7 @@
                                :legend {:layout "vertical"
                                         :align "right"
                                         :verticalAlign "top"
-                                        :x -40
+                                        :x 10
                                         :y 100
                                         :floating false
                                         :borderWidth 1
