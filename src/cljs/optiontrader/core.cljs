@@ -49,6 +49,7 @@
 (def tempid (let [n (atom 0)] (fn [] (swap! n dec))))
 
 (def counter (atom 0))
+(def apikey "c2v7fui7p2igjtjw")
 (defn next-idx []
   (swap! counter inc))
 
@@ -72,6 +73,8 @@
 )
 ;;
 ;;http calls
+
+(def apikey "c2v7fui7p2igjtjw")
 (defn log [s]
   (.log js/console (str s)))
 
@@ -120,8 +123,22 @@
 
 (defn do-login [user-name passwd]
   (log (str "User Login destructuring" user-name passwd))
-  (go
-    (read-login-response (<! (do-http-get ((:usertoken url_list) user-name passwd))))))
+  (comment
+    (go
+      (read-login-response (<! (do-http-get ((:usertoken url_list) user-name passwd)))))
+  )
+  (def zerodha-login-url (str "https://kite.trade/connect/login?api_key=" apikey))
+  (log (str "zerodha Login" zerodha-login-url))
+  (do-http-get zerodha-login-url)
+  )
+
+(comment
+  (def zerodha-login-url (str "https://graph.facebook.com/oauth/authorize?client_id=116170012066426&scope=email&response_type=code&redirect_uri=http://localhost:3000/api/fb_callback"))
+  ;;(def usergrid_url (str "https://www.facebook.com/dialog/oauth?client_id=116170012066426&scope=email&response_type=code&redirect_uri=http://localhost:3000/api/fb_callback"))
+  (log (str "zerodha Login" zerodha-login-url))
+  (do-http-get zerodha-login-url)
+
+)
 ;;
 
 (def app-state (reagent/atom {
@@ -451,7 +468,8 @@
          [nav-link "#/" "Home" :home collapsed?]
          [nav-link "#/mystrategies" "My Strategies" :mystrategies collapsed?]
          [nav-link "#/recommendations" "Recommendations" :recommendations collapsed?]
-         [nav-link "#/login" "Login" :recommendations collapsed?]
+         ;[nav-link "#/login" "Login" :recommendations collapsed?]
+         [nav-link (str "https://kite.trade/connect/login?api_key=" apikey) "Login - Zerodha" :recommendations collapsed?]
          [nav-link "#/about" "About" :about collapsed?]]]])))
 
 (defn navbar-new []
@@ -850,7 +868,6 @@
                           :full-width false
                           :value (:name (:person @app-state))
                           :on-change #(swap! app-state assoc-in [:person :name] (-> % .-target .-value))
-                          ;:on-change #(log (.. % -target -value))
                           }]]
           [:div {:style {:flex "1"}}
             [rui/text-field
@@ -859,7 +876,6 @@
                           :full-width false
                           :value (:password (:person @app-state))
                           :on-change #(swap! app-state assoc-in [:person :password] (-> % .-target .-value))
-                          ;:on-change #(log (.. % -target -value))
                           }]]
           [:div {:style {:flex "1"}}  
 [:div {:style {:flex "0.25"}} 
