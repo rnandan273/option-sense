@@ -62,7 +62,8 @@
   (GET "/zerodha_cb" req
                    (timbre/info "In zerodha Callback :"  (:params req))
                    (if (= (:status (:params req)) "success")
-                        (home-page)
-                        (timbre/info "ERROR LOGGING IN ")))
+                        (handle-zerodha-response)
+                        (timbre/info "ERROR LOGGING IN "))
+                   (home-page))
   (GET "/docs" [] (response/ok (-> "docs/docs.md" io/resource slurp))))
 
