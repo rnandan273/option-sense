@@ -1,5 +1,6 @@
 (ns optiontrader.core
   (:require [reagent.core :as reagent]
+            [reagent.cookies :as cookies]
             [reagent.session :as session]
             [secretary.core :as secretary :include-macros true]
             [goog.events :as events]
@@ -87,7 +88,13 @@
                    (str "/usertoken?grant_type=password&username=" username "&password=" password))
                :user_register
                  (fn [username passwd rt_passwd email]
-                    (str "/register"))})
+                    (str "/register"))
+              :zerodha_login
+                 (fn []
+                    (str "/zerodha-login"))
+              :get_ws_url
+                 (fn []
+                    (str "/get_ws_url"))})
 
 (def read-json (t/reader :json))
 
@@ -114,37 +121,67 @@
   (let [ch (chan 1)]
     (POST url {:params  (clj->js doc) :format :json :handler (fn [response] (response-handler ch response))
                :error-handler (fn [response] (response-handler ch response))})
-    ch)
-  )
+    ch))
+
 
 
 (defn read-login-response [response]
   (log (walk/keywordize-keys response)))
 
-(defn do-login [user-name passwd]
-  (log (str "User Login destructuring" user-name passwd))
-  (comment
+(defn zerodha-login []
+  (log (str "User Zerodha" ))
     (go
-      (read-login-response (<! (do-http-get ((:usertoken url_list) user-name passwd)))))
-  )
-  (def zerodha-login-url (str "https://kite.trade/connect/login?api_key=" apikey))
-  (log (str "zerodha Login" zerodha-login-url))
-  (do-http-get zerodha-login-url)
+      (read-login-response (<! (do-http-get ((:zerodha_login url_list))))))
   )
 
-(comment
-  (def zerodha-login-url (str "https://graph.facebook.com/oauth/authorize?client_id=116170012066426&scope=email&response_type=code&redirect_uri=http://localhost:3000/api/fb_callback"))
-  ;;(def usergrid_url (str "https://www.facebook.com/dialog/oauth?client_id=116170012066426&scope=email&response_type=code&redirect_uri=http://localhost:3000/api/fb_callback"))
-  (log (str "zerodha Login" zerodha-login-url))
-  (do-http-get zerodha-login-url)
+;;
 
-)
+;; web sockets
+(comment)
+(def unique-token (atom -1))
+(def messages (atom {}))
+
+(defn update-messages! [message]
+;(defn update-messages! [{:keys [message]}]
+  ;(.log js/console (str "in update-messages MESSAGE " (walk/keywordize-keys message)))
+  (log (str "in update-messages MESSAGE " (:message message) (:token message)))
+  (reset! unique-token (:token message))
+  (swap! messages #(vec (take 10 (conj % (:message message))))))
+
+(defonce ws-chan (atom nil))
+(def json-reader (t/reader :json))
+(def json-writer (t/writer :json-verbose))
+
+(defn receive-transit-msg!
+ [update-fn]
+ (fn [msg]
+   (log (str "Received - " (.-data msg)))
+   (update-fn (->> msg .-data (t/read json-reader) (walk/keywordize-keys)))))
+
+ (defn send-transit-msg!
+ [msg]
+ (log (str "SENDING ->\n" (t/write json-writer msg)))
+ (if @ws-chan
+        (.send @ws-chan (t/write json-writer msg))
+   (throw (js/Error. "Websocket is not available!"))))
+
+ (defn make-websocket! [url receive-handler]
+ (println "attempting to connect websocket")
+ (if-let [chan (js/WebSocket. url)]
+   (do
+     (set! (.-onmessage chan) (receive-transit-msg! receive-handler))
+     (reset! ws-chan chan)
+     (println "Websocket connection established with: " url))
+   (throw (js/Error. "Websocket connection failed!"))))
+
+
 ;;
 
 (def app-state (reagent/atom {
                         :person {:name "stoc"
                                  :password "..."
                                  :token ""}
+                        :ws-url ""
                         :base-strike-price 7900
                         :strike-price 8200 
                         :current-option 8100
@@ -520,6 +557,9 @@
         pr3 (get-premium sp3)
         pr4 (get-premium sp4)]
 
+        (def msg {:a "subscribe" :v [408065, 884737]})
+        (send-transit-msg! msg)
+
   (swap! app-state assoc-in [:chart-config :series] [
     {:name "Long ATM Butterfly" 
      :data (mat/add (buy-call sp1 pr1) (mat/mul 2 (sell-call sp2 pr2)) (buy-call sp3 pr3))}
@@ -627,7 +667,9 @@
          ]
       [:div {:style {:flex "0.5"}} 
                   [ui/raised-button {:label "Explore" 
-                                     :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] true)}]]
+                                     :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] true)}]
+                  [ui/raised-button {:label "Zerodha" 
+                                     :on-touch-tap #(zerodha-login)}]]
       [:div {:style {:flex "1"}} [strategy-drawer]]]]))
 
 (comment
@@ -881,10 +923,11 @@
           [:div {:style {:flex "1"}}  
 [:div {:style {:flex "0.25"}} 
                           [ui/raised-button {:label "LOGIN" 
-                                             :on-touch-tap #(do-login (:name (:person @app-state))
+                                             :on-touch-tap #(log (str (:name (:person @app-state))
                                                                       (:password (:person @app-state))
-                                                                      )}]]]]
+                                                                      ))}]]]]
                                            ]]))
+
 
 (def pages
   {:home #'home-page
@@ -915,6 +958,13 @@
 (secretary/defroute "/recommendations" []
   (session/put! :page :recommendations))
 
+(defn redirect_handle_page_load []
+  (log "history event")
+  (log (cookies/get "token"))
+  (if (cookies/contains-key? "token")
+      (make-websocket! (cookies/get "token") update-messages!)
+      (log (cookies/get "token"))))
+
 ;; -------------------------
 ;; History
 ;; must be called after routes have been defined
@@ -923,10 +973,13 @@
         (events/listen
           HistoryEventType/NAVIGATE
           (fn [event]
+              (redirect_handle_page_load)
               (secretary/dispatch! (.-token event))))
         (.setEnabled true)))
 
 ;; -------------------------
+
+
 ;; Initialize app
 (defn fetch-docs! []
   (GET (str js/context "/docs") {:handler #(session/put! :docs %)}))
@@ -941,4 +994,7 @@
   (fetch-docs!)
   (hook-browser-navigation!)
   (mount-components)
-  (update-strike-price (str (+ (:base-strike-price @app-state) (* 2 (:span @app-state))))))
+  ;(make-websocket! (str "ws://" (.-host js/location) "/ws") update-messages!)
+  (update-strike-price (str (+ (:base-strike-price @app-state) (* 2 (:span @app-state)))))
+  
+  )
