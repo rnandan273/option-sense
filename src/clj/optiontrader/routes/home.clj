@@ -2,6 +2,7 @@
   (:require [optiontrader.layout :as layout]
             [compojure.core :refer [defroutes GET]]
             [ring.util.http-response :as response]
+            [ring.util.http-response :refer [ok found]]
             [taoensso.timbre :as timbre]
             [org.httpkit.client :as http]
             [clojure.data.json :as json]
@@ -54,6 +55,10 @@
 (defroutes home-routes
   (GET "/" [] (timbre/info "Accessed Home ")(home-page))
   (GET "/margin" [] (timbre/info "Accessed Margin ") (response/ok (handle-margin-query)))
+
+  (GET "/zerodha-login" [] (timbre/info "In SYNC FB 123 :" )
+        (found(str "https://kite.trade/connect/login?api_key=" api-key)))
+
   (GET "/zerodha_cb" req
                    (timbre/info "In zerodha Callback :"  (:params req))
                    (if (= (:status (:params req)) "success")
