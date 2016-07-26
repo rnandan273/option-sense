@@ -667,9 +667,7 @@
          ]
       [:div {:style {:flex "0.5"}} 
                   [ui/raised-button {:label "Explore" 
-                                     :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] true)}]
-                  [ui/raised-button {:label "Zerodha" 
-                                     :on-touch-tap #(zerodha-login)}]]
+                                     :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] true)}]]
       [:div {:style {:flex "1"}} [strategy-drawer]]]]))
 
 (comment
