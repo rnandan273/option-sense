@@ -7,20 +7,25 @@
             [optiontrader.subs]
             [datascript.core :as d]
             [clojure.core.matrix :as mat]
+            [cljs.core.async :as async :refer [chan close!]]
             [cljs.core.match :refer-macros [match]]
             [goog.history.EventType :as HistoryEventType]
             [markdown.core :refer [md->html]]
             [optiontrader.ajax :refer [load-interceptors!]]
             [ajax.core :refer [GET POST]]
             [cljs.reader :as reader]
+            [clojure.walk :as walk]
             [cljsjs.highcharts :as highcharts]
             [re-frame.core :as re-frame]
             [posh.reagent :refer [pull q posh!]]
+            [cognitect.transit :as t]
             [cljsjs.material-ui]
             [cljs-react-material-ui.core :as ui]
             [cljs-react-material-ui.reagent :as rui]
             [cljs-react-material-ui.icons :as ic])
-  (:import goog.History))
+  (:import goog.History)
+  (:require-macros
+    [cljs.core.async.macros :refer [go alt!]]))
 
 ;;posh related
 (comment
@@ -66,8 +71,64 @@
   )
 )
 ;;
+;;http calls
+(defn log [s]
+  (.log js/console (str s)))
 
-(def app-state (reagent/atom {:base-strike-price 7900
+
+(def url_list {:usertoken1
+                 (fn [username password]
+                   (str "/api/getUserToken?grant_type=password&username=" username "&password=" password))
+               :usertoken
+                 (fn [username password]
+                   (str "/usertoken?grant_type=password&username=" username "&password=" password))
+               :user_register
+                 (fn [username passwd rt_passwd email]
+                    (str "/register"))})
+
+(def read-json (t/reader :json))
+
+(def write-json (t/writer :json))
+
+(defn read-server-response [response]
+  (walk/keywordize-keys (t/read read-json response)))
+
+(defn response-handler [ch response]
+  (go (>! ch response)(close! ch))
+  (log "DONE"))
+
+(defn do-http-get [url]
+  (log (str "GET " url))
+  (let [ch (chan 1)]
+    (GET url {:handler (fn [response](response-handler ch response))
+              :error-handler (fn [response] (response-handler ch response))})
+    ch))
+
+
+(defn do-http-post [url doc]
+  (log "POSTING ---->")
+  (log (str "POST " url (clj->js doc)))
+  (let [ch (chan 1)]
+    (POST url {:params  (clj->js doc) :format :json :handler (fn [response] (response-handler ch response))
+               :error-handler (fn [response] (response-handler ch response))})
+    ch)
+  )
+
+
+(defn read-login-response [response]
+  (log (walk/keywordize-keys response)))
+
+(defn do-login [user-name passwd]
+  (log (str "User Login destructuring" user-name passwd))
+  (go
+    (read-login-response (<! (do-http-get ((:usertoken url_list) user-name passwd))))))
+;;
+
+(def app-state (reagent/atom {
+                        :person {:name "stoc"
+                                 :password "..."
+                                 :token ""}
+                        :base-strike-price 7900
                         :strike-price 8200 
                         :current-option 8100
                         :hedge-drawer false
@@ -390,6 +451,7 @@
          [nav-link "#/" "Home" :home collapsed?]
          [nav-link "#/mystrategies" "My Strategies" :mystrategies collapsed?]
          [nav-link "#/recommendations" "Recommendations" :recommendations collapsed?]
+         [nav-link "#/login" "Login" :recommendations collapsed?]
          [nav-link "#/about" "About" :about collapsed?]]]])))
 
 (defn navbar-new []
@@ -772,9 +834,45 @@
                                        :on-touch-tap #(swap! app-state assoc-in [:hedge-drawer] true)}]]
                   [:div {:style {:flex "1"}} [hedge-drawer]]]]]]))
 
+
+(defn login-page []
+  ;(let [login_doc (reagent/atom (@app-state :person))]
+    (fn []
+      [rui/mui-theme-provider
+          {:mui-theme (ui/get-mui-theme {:palette {:text-color (ui/color :blue700)}})}
+      [:form  {:className "form-horizontal"}
+      [rui/paper  {:zDepth 0 :style {:display "flex" :align-items "center" :flex-direction "column" :padding "20px" :flex-flow "column wrap"}}
+          [:div {:style {:flex "1"}}[:h6 "Enter your Zerodha credentials"]]
+          [:div {:style {:flex "1"}} 
+              [rui/text-field
+                          {
+                          :floatingLabelText "Enter UserID"
+                          :full-width false
+                          :value (:name (:person @app-state))
+                          :on-change #(swap! app-state assoc-in [:person :name] (-> % .-target .-value))
+                          ;:on-change #(log (.. % -target -value))
+                          }]]
+          [:div {:style {:flex "1"}}
+            [rui/text-field
+                          {
+                          :floatingLabelText "Enter Password"
+                          :full-width false
+                          :value (:password (:person @app-state))
+                          :on-change #(swap! app-state assoc-in [:person :password] (-> % .-target .-value))
+                          ;:on-change #(log (.. % -target -value))
+                          }]]
+          [:div {:style {:flex "1"}}  
+[:div {:style {:flex "0.25"}} 
+                          [ui/raised-button {:label "LOGIN" 
+                                             :on-touch-tap #(do-login (:name (:person @app-state))
+                                                                      (:password (:person @app-state))
+                                                                      )}]]]]
+                                           ]]))
+
 (def pages
   {:home #'home-page
    :mystrategies #'mystrategies-page
+   :login #'login-page
    :recommendations #'recommendations-page
    :about #'about-page})
 
@@ -787,6 +885,9 @@
 
 (secretary/defroute "/" []
   (session/put! :page :home))
+
+(secretary/defroute "/login" []
+  (session/put! :page :login))
 
 (secretary/defroute "/about" []
   (session/put! :page :about))

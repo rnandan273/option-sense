@@ -28,6 +28,7 @@
                  [luminus-nrepl "0.1.4"]
                  [re-frame "0.7.0"]
                  [datascript "0.15.0"]
+                 [com.cognitect/transit-cljs "0.8.205"]
                  [alandipert/storage-atom "2.0.1"]
                  [net.mikera/core.matrix "0.52.2"]
                  [cljs-react-material-ui "0.2.19"]
