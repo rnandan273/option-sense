@@ -673,6 +673,8 @@
          ]
       [:div {:style {:flex "0.5"}} 
                   [ui/raised-button {:label "Explore" 
+                                     :label-color "#FFFFFF"
+                                     :background-color "#3b5998"
                                      :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] true)}]]
       [:div {:style {:flex "1"}} [strategy-drawer]]]]))
 
