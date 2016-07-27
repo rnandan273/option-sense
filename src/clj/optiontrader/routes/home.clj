@@ -74,6 +74,8 @@
 
   (GET "/margin" [] (timbre/info "Accessed Margin ") (response/ok (handle-margin-query)))
 
+  (GET "/nifty" [] (timbre/info "Accessed Nifty ") (response/ok (handle-nifty-query)))
+
   (GET "/zerodha-login" [] (timbre/info "In SYNC FB 123 :" )
         (found (str "https://kite.trade/connect/login?api_key=" api-key)))
 

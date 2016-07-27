@@ -507,7 +507,7 @@
          [nav-link "#/mystrategies" "My Strategies" :mystrategies collapsed?]
          [nav-link "#/recommendations" "Recommendations" :recommendations collapsed?]
          ;[nav-link "#/login" "Login" :recommendations collapsed?]
-         [nav-link "/zerodha-login" "Login-Zerodha" :recommendations collapsed?]
+         [nav-link "/zerodha-login" "Login" :recommendations collapsed?]
          ;[nav-link (str "https://kite.trade/connect/login?api_key=" apikey) "Login - Zerodha" :recommendations collapsed?]
          [nav-link "#/about" "About" :about collapsed?]]]])))
 
