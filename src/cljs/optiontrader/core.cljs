@@ -181,6 +181,7 @@
                         :person {:name "stoc"
                                  :password "..."
                                  :token ""}
+                        :zerodha-user "ZERODHA-USER"
                         :ws-url ""
                         :base-strike-price 7900
                         :strike-price 8200 
@@ -558,7 +559,7 @@
         pr4 (get-premium sp4)]
 
         (def msg {:a "subscribe" :v [408065, 884737]})
-        (send-transit-msg! msg)
+        ;(send-transit-msg! msg)
 
   (swap! app-state assoc-in [:chart-config :series] [
     {:name "Long ATM Butterfly" 
@@ -638,8 +639,13 @@
 (defn strategies-comp []
   (fn []
     [:div 
-  [:div {:style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
-    [:label "Explore Option strategies at selected ATM Nifty Strike Price"]]
+  [:div {:style {:display "flex" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
+    [:div {:style {:flex "1"}}
+        [:label (str "Welcome " (:zerodha-user @app-state))]]
+[:div {:style {:flex "1"}}
+        [:label "Explore Option strategies at selected ATM Nifty Strike Price"]]
+
+        ]
     [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
       [:div {:style {:flex 5}}
           ;[rui/paper  {:zDepth 4} 
@@ -958,10 +964,19 @@
 
 (defn redirect_handle_page_load []
   (log "history event")
+  (log (cookies/count))
+  (log (cookies/keys))
   (log (cookies/get "token"))
+  (log (cookies/get "username"))
+  (comment
   (if (cookies/contains-key? "token")
-      (make-websocket! (cookies/get "token") update-messages!)
-      (log (cookies/get "token"))))
+      (make-websocket! (cookies/get "token") update-messages!))
+  )
+  
+  (if (cookies/contains-key? "username")
+      (swap! app-state assoc-in [:zerodha-user] (str (cookies/get "username"))))
+
+  )
 
 ;; -------------------------
 ;; History

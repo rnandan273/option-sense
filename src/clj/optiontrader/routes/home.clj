@@ -53,11 +53,13 @@
         body     (json/read-str body-str :key-fn keyword)
         ]
       (timbre/info "Body " (type body) body)
+      (timbre/info "Data " (:data body))
       (timbre/info "Status " (:status body))
-      (timbre/info "Data " (:access_token (:data body)))
+      (timbre/info "Access_token " (:access_token (:data body)))
       (timbre/info "UserId " (:user_id (:data body)))
       (timbre/info "PublicToken " (:public_token (:data body)))
       (swap! app-state assoc-in [:user_id] (:user_id (:data body)))
+      (swap! app-state assoc-in [:user_name] (:user_name (:data body)))
       (swap! app-state assoc-in [:public_token] (:public_token (:data body)))
       (swap! app-state assoc-in [:access-token] (:access_token (:data body)))
       (timbre/info "App-state " @app-state)
@@ -81,11 +83,18 @@
                         (handle-zerodha-response req)
                         (timbre/info "ERROR LOGGING IN "))
                    
-                   (def wsurl (str "token=wss://websocket.kite.trade/?api_key=" api-key "&user_id=" (:user_id @app-state) "&public_token=" (:public_token @app-state)))
-                  
+                   (def mycookies (str "token=wss://websocket.kite.trade/?api_key=" api-key "&user_id=" (:user_id @app-state) "&public_token=" (:public_token @app-state)
+                                   ",username=" (:user_name @app-state)))
+
+                   (def wscookie (str "wss://websocket.kite.trade/?api_key=" api-key "&user_id=" (:user_id @app-state) "&public_token=" (:public_token @app-state))
+                           )
+                  (timbre/info wscookie)
                    {:status 302
+                    :cookies {"token" wscookie "username" (:user_name @app-state)}
                     :headers {"location" "/#/"
-                     "set-cookie"  wsurl}}
+                     ;"set-cookie"  mycookies
+                     }}
+                     
                      )
   (GET "/docs" [] (response/ok (-> "docs/docs.md" io/resource slurp))))
 
