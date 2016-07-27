@@ -559,7 +559,7 @@
         pr4 (get-premium sp4)]
 
         (def msg {:a "subscribe" :v [408065, 884737]})
-        ;(send-transit-msg! msg)
+        (send-transit-msg! msg)
 
   (swap! app-state assoc-in [:chart-config :series] [
     {:name "Long ATM Butterfly" 
@@ -964,19 +964,21 @@
 
 (defn redirect_handle_page_load []
   (log "history event")
+  (let [username (cookies/get "username")
+        userid (cookies/get "user_id")
+        public_token (cookies/get "publictoken")
+        wsurl  (str "wss://websocket.kite.trade/?api_key=" apikey "&user_id=" userid "&public_token=" public_token)]
   (log (cookies/count))
   (log (cookies/keys))
-  (log (cookies/get "token"))
-  (log (cookies/get "username"))
-  (comment
-  (if (cookies/contains-key? "token")
-      (make-websocket! (cookies/get "token") update-messages!))
-  )
+  (log (str username " - " userid " - " public_token " - " wsurl))
+
+  (if (cookies/contains-key? "publictoken")
+      (make-websocket! wsurl update-messages!))
   
   (if (cookies/contains-key? "username")
       (swap! app-state assoc-in [:zerodha-user] (str (cookies/get "username"))))
 
-  )
+  ))
 
 ;; -------------------------
 ;; History

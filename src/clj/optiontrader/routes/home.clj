@@ -92,7 +92,7 @@
                            )
                   (timbre/info wscookie)
                    {:status 302
-                    :cookies {"token" wscookie "username" (:user_name @app-state)}
+                    :cookies {"publictoken" (:public_token @app-state) "user_id" (:user_id @app-state) "username" (:user_name @app-state)}
                     :headers {"location" "/#/"
                      ;"set-cookie"  mycookies
                      }}
