@@ -476,12 +476,12 @@
           [(strategy-details strategy-type)]
           [rui/card-actions {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
               [:div {:style {:flex "1"} :on-click #(execute-strategy strategy-type)}  
-                  [ui/raised-button {:label "Execute" :on-touch-tap #()}]]
+                  [ui/raised-button {:label "Execute" :label-color "#FFFFFF" :background-color "#3b5998" :on-touch-tap #()}]]
               [:div {:style {:flex "1"}}
               ;:on-click #(save-strategy strategy-type)}  
-                  [ui/raised-button {:label "Save" :on-touch-tap #(save-strategy strategy-type)}]]
+                  [ui/raised-button {:label "Save" :label-color "#FFFFFF" :background-color "#3b5998" :on-touch-tap #(save-strategy strategy-type)}]]
               [:div {:style {:flex "1"}}  
-                  [ui/raised-button {:label "Close" 
+                  [ui/raised-button {:label "Close" :label-color "#FFFFFF" :background-color "#3b5998"
                                      :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] false)}]]]])))
 
 
@@ -809,12 +809,12 @@
       [:div {:style {:flex "1"}}
         [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
         [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/raised-button {:label "Execute" :on-touch-tap #()}]]
+                  [ui/raised-button {:label "Execute" :label-color "#FFFFFF" :background-color "#3b5998" :on-touch-tap #()}]]
         [:div {:style {:flex "1"}}  
-                  [ui/raised-button {:label "Clear All" 
+                  [ui/raised-button {:label "Clear All" :label-color "#FFFFFF" :background-color "#3b5998"
                                      :on-touch-tap #(delete-all-orders)}]]
         [:div {:style {:flex "1"}}  
-                  [ui/raised-button {:label "Close" 
+                  [ui/raised-button {:label "Close" :label-color "#FFFFFF" :background-color "#3b5998"
                                      :on-touch-tap #(swap! app-state assoc-in [:hedge-drawer] false)}]]
                   ]]]]))
 
@@ -875,7 +875,7 @@
                             (ic/action-delete)]]
              ])]
         [:div {:style {:flex "1"} :on-click #()}  
-                  [ui/raised-button {:label "Execute" :on-touch-tap #()}]]
+                  [ui/raised-button {:label "Execute" :label-color "#FFFFFF" :background-color "#3b5998" :on-touch-tap #()}]]
         
         ]))
 
@@ -897,7 +897,7 @@
                       ;[:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
                         [highchart-component]]
                   [:div {:style {:flex "0.25"}} 
-                    [ui/raised-button {:label "Hedge" 
+                    [ui/raised-button {:label "Hedge" :label-color "#FFFFFF" :background-color "#3b5998"
                                        :on-touch-tap #(swap! app-state assoc-in [:hedge-drawer] true)}]]
                   [:div {:style {:flex "1"}} [hedge-drawer]]]]]]))
 
