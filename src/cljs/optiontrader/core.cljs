@@ -707,7 +707,9 @@
     [:div {:style {:flex "1"}}
         [:label (str "Welcome " (:zerodha-user-id @app-state) " - " (:zerodha-user @app-state))]]
 [:div {:style {:flex "1"}}
-        [:label "Explore Option strategies at selected ATM Nifty Strike Price"]]
+        [:label "Explore Option strategies at selected ATM Nifty Strike Price"]
+        [:h6 "Click REFRESH to fetch the latest premiums for the strike prices to calculate the payoffs"]
+        [:h6 "Click EXPLORE to view strategies in detail"]]
 
         ]
     [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
