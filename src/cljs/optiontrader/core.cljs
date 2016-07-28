@@ -189,7 +189,18 @@
                         :person {:name "stoc"
                                  :password "..."
                                  :token ""}
-                        :quotes {}
+                        :quotes {:NIFTY16AUG7900CE 786.4
+                                 :NIFTY16AUG8000CE 691.25
+                                 :NIFTY16AUG8100CE 550
+                                 :NIFTY16AUG8200CE 450
+                                 :NIFTY16AUG8300CE 350      
+                                 :NIFTY16AUG8400CE 250
+                                 :NIFTY16AUG8500CE 150
+                                 :NIFTY16AUG8600CE 100
+                                 :NIFTY16AUG9000CE 69.35
+                                 :NIFTY16AUG8700CE 39
+                                 :NIFTY16AUG8800CE 29
+                                 :NIFTY16AUG8900CE 10}
                         :zerodha-user "ZERODHA-USER"
                         :zerodha-user-id "XXXX"
                         :ws-url ""
@@ -700,6 +711,19 @@
 
         ]
     [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
+       [:div {:style {:display "flex" :justify-content "space-around" :padding "20px" :flex-direction "column" :flex-flow "column wrap"}}
+                  [:div {:style {:flex "0.5"}}
+                    [ui/raised-button {:label "Refresh" 
+                                       :label-color "#FFFFFF"
+                                       :background-color "#3b5998"
+                                       :on-touch-tap #(get-quotes)}]]
+
+                  [:div {:style {:flex "0.5"}}
+                    [ui/raised-button {:label "Explore" 
+                                       :label-color "#FFFFFF"
+                                       :background-color "#3b5998"
+                                       :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] true)}]]
+                                     ]
       [:div {:style {:flex 5}}
           ;[rui/paper  {:zDepth 4} 
           [:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
@@ -721,23 +745,10 @@
                                          )
                          }]
           ]
+
           [:div {:style {:flex "1"}} [highchart-component]]]
           ;]
          ]
-      [:div {:style {:flex "0.5"}} 
-          [:div {:style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
-                  [:div {:style {:flex "0.5"}}
-                    [ui/raised-button {:label "Refresh" 
-                                       :label-color "#FFFFFF"
-                                       :background-color "#3b5998"
-                                       :on-touch-tap #(get-quotes)}]]
-
-                  [:div {:style {:flex "0.5"}}
-                    [ui/raised-button {:label "Explore" 
-                                       :label-color "#FFFFFF"
-                                       :background-color "#3b5998"
-                                       :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] true)}]]
-                                     ]]
       [:div {:style {:flex "2"}} [strategy-drawer]]]]))
 
 (comment
@@ -950,17 +961,16 @@
           ;{:mui-theme (ui/get-mui-theme "lightBaseTheme")}
             [rui/paper  {:zDepth 4 :style {:display "flex" :justify-content "space-around" :flex-direction "column" :padding "20px" :flex-flow "column wrap"}}
               [:div {:style {:flex "1"}}[:h6 "Saved and executed strategies\n"]]
-              [:div {:style {:flex "1"}} [:h6 "Do a \"What If Hedge analysis \" to your positions before you execute a trade"]
-]
+              [:div {:style {:flex "1"}} [:h6 "Do a \"What If Hedge analysis \" to your positions before you execute a trade"]]
+              [:div {:style {:flex "0.25"}} 
+                    [ui/raised-button {:label "Hedge" :label-color "#FFFFFF" :background-color "#3b5998"
+                                       :on-touch-tap #(swap! app-state assoc-in [:hedge-drawer] true)}]]
               [:div {:style {:flex "1"}} 
                 [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
                   [:div {:style {:flex "6"}}
                       ;[rui/paper  {:zDepth 4} 
                       ;[:div {:style {:display "flex" :flex-direction "column" :flex-flow "column wrap"}}
                         [highchart-component]]
-                  [:div {:style {:flex "0.25"}} 
-                    [ui/raised-button {:label "Hedge" :label-color "#FFFFFF" :background-color "#3b5998"
-                                       :on-touch-tap #(swap! app-state assoc-in [:hedge-drawer] true)}]]
                   [:div {:style {:flex "1"}} [hedge-drawer]]]]]]))
 
 
