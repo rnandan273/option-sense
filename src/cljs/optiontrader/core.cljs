@@ -725,7 +725,7 @@
           ;]
          ]
       [:div {:style {:flex "0.5"}} 
-          [:div {:style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
+          [:div {:style {:display "flex" :justify-content "space-around" :flex-direction "column" :flex-flow "column wrap"}}
                   [:div {:style {:flex "0.5"}}
                     [ui/raised-button {:label "Refresh" 
                                        :label-color "#FFFFFF"
