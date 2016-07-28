@@ -92,6 +92,12 @@
               :zerodha_login
                  (fn []
                     (str "/zerodha-login"))
+              :get_quotes
+                 (fn []
+                    (str "/get_quotes"))
+              :get_quote
+                 (fn []
+                    (str "/get_quote?scrip="))
               :get_ws_url
                  (fn []
                     (str "/get_ws_url"))})
@@ -133,6 +139,8 @@
     (go
       (read-login-response (<! (do-http-get ((:zerodha_login url_list))))))
   )
+
+
 
 ;;
 
@@ -181,7 +189,9 @@
                         :person {:name "stoc"
                                  :password "..."
                                  :token ""}
+                        :quotes {}
                         :zerodha-user "ZERODHA-USER"
+                        :zerodha-user-id "XXXX"
                         :ws-url ""
                         :base-strike-price 7900
                         :strike-price 8200 
@@ -313,6 +323,40 @@
                           :orders [{:sp 0 :type "call" :order "sell" :qty 1 :pr 0}
                                    {:sp 1 :type "call" :order "buy" :qty 2 :pr 1}]}})
 
+
+(defn read-quote-response [response]
+  (log "reading quote response")
+  (let [resp (walk/keywordize-keys response)]   
+    (log (nth (into [] (keys resp)) 0))
+    (log (nth (into [] (vals resp)) 0))
+
+    (swap! app-state assoc-in [:quotes (nth (into [] (keys resp)) 0)] (nth (into [] (vals resp)) 0))
+    ;(log ((keyword (str "NIFTY16JUL" "8500" "CE")) (:quotes @app-state)))
+    (log (:quotes @app-state))))
+
+(defn get-quotes []
+  (log (str "get quotes" ))
+    (go (read-quote-response (<! (do-http-get (str "/get_quote_xxx?scrip=" "7900CE")))))
+    (go (read-quote-response (<! (do-http-get (str "/get_quote_xxx?scrip=" "8000CE")))))
+    (go (read-quote-response (<! (do-http-get (str "/get_quote_xxx?scrip=" "8100CE")))))
+    (go (read-quote-response (<! (do-http-get (str "/get_quote_xxx?scrip=" "8200CE")))))
+    (go (read-quote-response (<! (do-http-get (str "/get_quote_xxx?scrip=" "8300CE")))))
+    (go (read-quote-response (<! (do-http-get (str "/get_quote_xxx?scrip=" "8400CE")))))
+    (go (read-quote-response (<! (do-http-get (str "/get_quote_xxx?scrip=" "8500CE")))))
+    (go (read-quote-response (<! (do-http-get (str "/get_quote_xxx?scrip=" "8600CE")))))
+    (go (read-quote-response (<! (do-http-get (str "/get_quote_xxx?scrip=" "8700CE")))))
+    (go (read-quote-response (<! (do-http-get (str "/get_quote_xxx?scrip=" "8800CE")))))
+    (go (read-quote-response (<! (do-http-get (str "/get_quote_xxx?scrip=" "8900CE")))))
+    (go (read-quote-response (<! (do-http-get (str "/get_quote_xxx?scrip=" "9000CE")))))
+  )
+
+(defn get-quote [scrip]
+  (log (str "get quotes" ))
+    (go
+      (read-quote-response (<! (do-http-get (str "/get_quote?query=" scrip)))))
+  )
+
+
 (defn matops []
   (let [a [1 2]
         b [3 4]]
@@ -320,8 +364,17 @@
 
 (def display-color "#dfe3ee")
 
+(defn get-last-premium [strike-price]
+  (log (str "Premiun for - : " strike-price "-" ((keyword (str "NIFTY16AUG" strike-price "CE")) (:quotes @app-state))))
+  ((keyword (str "NIFTY16AUG" strike-price "CE")) (:quotes @app-state)))
+
 (defn get-premium [strike-price]
-  ;(print "Premiun for - : " strike-price)
+  (get-last-premium strike-price))
+
+
+(defn get-premium-old [strike-price]
+ ; NIFTY16JUL8800CE
+  (print "Premiun for - : " strike-price)
   (let [bp (:base-strike-price @app-state)
         span (:span @app-state)]
   (cond 
@@ -559,7 +612,7 @@
         pr4 (get-premium sp4)]
 
         (def msg {:a "subscribe" :v [408065, 884737]})
-        (send-transit-msg! msg)
+        ;(send-transit-msg! msg)
 
   (swap! app-state assoc-in [:chart-config :series] [
     {:name "Long ATM Butterfly" 
@@ -641,7 +694,7 @@
     [:div 
   [:div {:style {:display "flex" :flex-direction "column" :padding "10px" :flex-flow "column wrap"}}
     [:div {:style {:flex "1"}}
-        [:label (str "Welcome " (:zerodha-user @app-state))]]
+        [:label (str "Welcome " (:zerodha-user-id @app-state) " - " (:zerodha-user @app-state))]]
 [:div {:style {:flex "1"}}
         [:label "Explore Option strategies at selected ATM Nifty Strike Price"]]
 
@@ -672,11 +725,20 @@
           ;]
          ]
       [:div {:style {:flex "0.5"}} 
-                  [ui/raised-button {:label "Explore" 
-                                     :label-color "#FFFFFF"
-                                     :background-color "#3b5998"
-                                     :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] true)}]]
-      [:div {:style {:flex "1"}} [strategy-drawer]]]]))
+          [:div {:style {:display "flex" :justify-content "space-around" :flex-direction "row" :flex-flow "row wrap"}}
+                  [:div {:style {:flex "0.5"}}
+                    [ui/raised-button {:label "Refresh" 
+                                       :label-color "#FFFFFF"
+                                       :background-color "#3b5998"
+                                       :on-touch-tap #(get-quotes)}]]
+
+                  [:div {:style {:flex "0.5"}}
+                    [ui/raised-button {:label "Explore" 
+                                       :label-color "#FFFFFF"
+                                       :background-color "#3b5998"
+                                       :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] true)}]]
+                                     ]]
+      [:div {:style {:flex "2"}} [strategy-drawer]]]]))
 
 (comment
 (defn strategies-comp-old []
@@ -966,21 +1028,31 @@
 
 (defn redirect_handle_page_load []
   (log "history event")
-  (let [username (cookies/get "username")
-        userid (cookies/get "user_id")
-        public_token (cookies/get "publictoken")
-        wsurl  (str "wss://websocket.kite.trade/?api_key=" apikey "&user_id=" userid "&public_token=" public_token)]
   (log (cookies/count))
   (log (cookies/keys))
-  (log (str username " - " userid " - " public_token " - " wsurl))
+  (log (cookies/get "user_id"))
+  ;(log (cookies/get "username"))
+  ;(log (cookies/get "publictoken"))
+  (let [username (cookies/get "username")
+        userid (cookies/get "user_id")
+        ;public_token (cookies/get "publictoken")
+        ;wsurl  (str "wss://websocket.kite.trade/?api_key=" apikey "&user_id=" userid "&public_token=" public_token)
+        ]
+  
+  (log (str username " - " userid))
+  ;(log (str username " - " userid " - " public_token))
 
+(comment
   (if (cookies/contains-key? "publictoken")
       (make-websocket! wsurl update-messages!))
+  )
   
   (if (cookies/contains-key? "username")
       (swap! app-state assoc-in [:zerodha-user] (str (cookies/get "username"))))
+  (if (cookies/contains-key? "user_id")
+      (swap! app-state assoc-in [:zerodha-user-id] (str (cookies/get "user_id")))
 
-  ))
+  )))
 
 ;; -------------------------
 ;; History
