@@ -714,12 +714,14 @@
        [:div {:style {:display "flex" :justify-content "space-around" :padding "20px" :flex-direction "column" :flex-flow "column wrap"}}
                   [:div {:style {:flex "0.5"}}
                     [ui/raised-button {:label "Refresh" 
+                                       :tooltip "Get the latest premium prices to calculate the payoffs"
                                        :label-color "#FFFFFF"
                                        :background-color "#3b5998"
                                        :on-touch-tap #(get-quotes)}]]
 
                   [:div {:style {:flex "0.5"}}
                     [ui/raised-button {:label "Explore" 
+                                       :tooltip "View different strategies available at the ATM"
                                        :label-color "#FFFFFF"
                                        :background-color "#3b5998"
                                        :on-touch-tap #(swap! app-state assoc-in [:strategy-drawer] true)}]]
@@ -963,7 +965,7 @@
               [:div {:style {:flex "1"}}[:h6 "Saved and executed strategies\n"]]
               [:div {:style {:flex "1"}} [:h6 "Do a \"What If Hedge analysis \" to your positions before you execute a trade"]]
               [:div {:style {:flex "0.25"}} 
-                    [ui/raised-button {:label "Hedge" :label-color "#FFFFFF" :background-color "#3b5998"
+                    [ui/raised-button {:label "Hedge" :tooltip "Choose legs of the trade to hedge" :label-color "#FFFFFF" :background-color "#3b5998"
                                        :on-touch-tap #(swap! app-state assoc-in [:hedge-drawer] true)}]]
               [:div {:style {:flex "1"}} 
                 [:div {:style {:display "flex" :flex-direction "row" :flex-flow "row wrap"}}
