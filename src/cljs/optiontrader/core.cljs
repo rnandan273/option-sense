@@ -122,7 +122,7 @@
 
 
 (defn do-http-post [url doc]
-  (log "POSTING ---->")
+  (log "POSTING data---->")
   (log (str "POST " url (clj->js doc)))
   (let [ch (chan 1)]
     (POST url {:params  (clj->js doc) :format :json :handler (fn [response] (response-handler ch response))
