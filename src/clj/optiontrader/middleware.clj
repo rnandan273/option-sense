@@ -9,6 +9,7 @@
             [ring.middleware.flash :refer [wrap-flash]]
             [immutant.web.middleware :refer [wrap-session]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]])
+   (:use [ring.middleware.gzip])
   (:import [javax.servlet ServletContext]))
 
 (defn wrap-context [handler]
@@ -63,4 +64,5 @@
             (assoc-in [:security :anti-forgery] false)
             (dissoc :session)))
       wrap-context
-      wrap-internal-error))
+      wrap-internal-error
+      wrap-gzip))
